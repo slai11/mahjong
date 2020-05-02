@@ -11,5 +11,8 @@ A minimalist multiplayer SG mahjong web app
 ## Contributing
 
 ## TODO
-1. get endpoint
+1. create new game
+2. set limit of games
 2. basic front end 
+
+* LOCK ON game if it is a move 

@@ -3,6 +3,11 @@ package main
 // possible actions to transition between states
 type Action int
 
+// 0 discard, 1 draw
+// 2 eat, 3 eatright, 4 eatleft
+// 5 pong
+// 6 gong, 7 innergong
+// 8 call
 const (
 	Discard Action = iota
 	Draw
@@ -37,6 +42,7 @@ func (p Player) next() Player {
 
 type PrevailingWind int
 
+// TODO refactor to avoid using hanyupinyin for winds
 const (
 	Dong PrevailingWind = iota
 	Nan

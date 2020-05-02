@@ -18,6 +18,7 @@ func (s *Server) Start(games map[string]*Game) error {
 	r := mux.NewRouter()
 	r.HandleFunc("/move", s.handleMove)
 	r.HandleFunc("/game_state", s.handleGetState)
+
 	s.Server = http.Server{
 		Addr:    ":80",
 		Handler: r,
@@ -34,7 +35,8 @@ func (s *Server) Start(games map[string]*Game) error {
 	return s.Server.ListenAndServe()
 }
 
-// GET
+// GET game_state
+// creates a new game state if 404
 func (s *Server) handleGetState(rw http.ResponseWriter, req *http.Request) {
 	var request struct {
 		GameID string `json:"game_id"`
@@ -49,8 +51,9 @@ func (s *Server) handleGetState(rw http.ResponseWriter, req *http.Request) {
 
 	gh, ok := s.games[request.GameID]
 	if !ok {
-		http.Error(rw, "No such game", 404)
-		return
+		// TODO set number of games that we can concurrently manage
+		gh = NewGame(request.GameID)
+		s.games[request.GameID] = gh
 	}
 
 	writeJSON(rw, gh)
