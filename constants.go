@@ -70,16 +70,22 @@ const (
 	Dragon
 	Animal
 	Flower
+)
 
+const (
 	East int = iota
 	South
 	West
 	North
+)
 
+const (
 	Green int = iota
 	Red
 	White
+)
 
+const (
 	Centipede int = iota
 	Chicken
 	Cat

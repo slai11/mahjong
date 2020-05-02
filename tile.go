@@ -60,7 +60,7 @@ func initSet() []Tile {
 		panic("need 148 tiles")
 	}
 
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().Unix())
 	rand.Shuffle(len(mj), func(i, j int) { mj[i], mj[j] = mj[j], mj[i] })
 	return mj
 }

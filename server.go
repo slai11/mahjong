@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -19,9 +20,14 @@ func (s *Server) Start(games map[string]*Game) error {
 	r.HandleFunc("/move", s.handleMove)
 	r.HandleFunc("/game_state", s.handleGetState)
 
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
 	s.Server = http.Server{
 		Addr:    ":80",
-		Handler: r,
+		Handler: handlers.CORS(originsOk, headersOk, methodsOk)(r),
 	}
 
 	s.games = games
@@ -38,22 +44,14 @@ func (s *Server) Start(games map[string]*Game) error {
 // GET game_state
 // creates a new game state if 404
 func (s *Server) handleGetState(rw http.ResponseWriter, req *http.Request) {
-	var request struct {
-		GameID string `json:"game_id"`
-		Index  int    `json:"index"`
-	}
+	q := req.URL.Query()
+	gameID := q.Get("game_id")
 
-	decoder := json.NewDecoder(req.Body)
-	if err := decoder.Decode(&request); err != nil {
-		http.Error(rw, "Error decoding", 400)
-		return
-	}
-
-	gh, ok := s.games[request.GameID]
+	gh, ok := s.games[gameID]
 	if !ok {
 		// TODO set number of games that we can concurrently manage
-		gh = NewGame(request.GameID)
-		s.games[request.GameID] = gh
+		gh = NewGame(gameID)
+		s.games[gameID] = gh
 	}
 
 	writeJSON(rw, gh)
