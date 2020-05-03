@@ -11,13 +11,20 @@ export interface GameState {
     turn_number: number;
     is_transitioning: boolean;
     player_map: object;
-    remaining_tiles: Tile[];
-    discarded_tiles: Tile[];
-    last_discarded_tile: Tile;
+    remaining_tiles: ITile[];
+    discarded_tiles: ITile[];
+    last_discarded_tile: ITile;
 }
 
-export interface Tile {
+export interface ITile {
     suit: number;
     value: number;
     id: number;
+}
+
+export interface IMove {
+    tile: ITile;
+    action: number;
+    player: number;
+    turn_number: number;
 }

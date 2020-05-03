@@ -83,6 +83,10 @@ func (gs *GameState) NextTurn(m Move) error {
 		gs.RemainingTiles = ps.InnerGong(m.Tile.Suit, m.Tile.Value, gs.RemainingTiles)
 
 	case Discard:
+		// only player's turn can call discard
+		if gs.PlayerTurn != m.Player {
+			return fmt.Errorf("not your turn to discard")
+		}
 		ps.Discard(m.Tile.ID)
 		// trigger update of all players
 		for k, v := range gs.PlayerMap {

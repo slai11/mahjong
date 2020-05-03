@@ -1,8 +1,9 @@
 <template>
   <div class="hand">
+    <h2>Your Hand</h2>
     <div v-if="this.hand" class="container">
-        <div v-for="tile of this.hand" :key=tile.id>
-            <Tile :value=tile.value :suit=tile.suit :id=tile.id />
+        <div v-for="tile of this.sortedHand" :key=tile.id>
+            <Tile @click.native="discard(tile)" :value=tile.value :suit=tile.suit :id=tile.id />
         </div>
     </div>
   </div>
@@ -11,6 +12,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Tile  from "./Tile.vue";
+import {ITile} from "../models/game_state"
 
 export default Vue.extend({
   name: 'Hand',
@@ -18,6 +20,20 @@ export default Vue.extend({
   components: {
       Tile
   },
+  computed: {
+    sortedHand(): [] {
+      const sortedHand = this.hand
+      return sortedHand.sort((a: ITile, b: ITile) => {return a.id - b.id})
+    }
+  },
+  methods: {
+    discard(t: ITile) {
+      this.$emit('move', {
+        tile: t,
+        action: 0
+      })
+    }
+  }
 });
 </script>
 

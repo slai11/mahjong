@@ -86,7 +86,7 @@ func (s *Server) handleMove(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	writeJSON(rw, gh)
+	writeJSON(rw, gh.Get())
 }
 
 // POST  player_select
@@ -136,6 +136,7 @@ func writeJSON(rw http.ResponseWriter, resp interface{}) {
 	rw.Write(j)
 }
 
+// Referenced https://asanchez.dev/blog/cors-golang-options/
 func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -145,12 +146,9 @@ func CORS(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Methods", "*")
 
 		if r.Method == "OPTIONS" {
-			fmt.Println("options ok")
 			w.WriteHeader(http.StatusOK)
 			return
 		}
-
-		fmt.Println("ok")
 
 		// Next
 		next.ServeHTTP(w, r)

@@ -52,13 +52,8 @@ export default Vue.extend({
 h3 {
   margin: 40px 0 0;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
+.tile {
+  outline: 2px solid green;
 }
 a {
   color: #42b983;

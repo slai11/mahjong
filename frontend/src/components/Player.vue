@@ -1,9 +1,7 @@
 <template>
   <div class="hand">
-    <h1>Your Displayed Sets</h1>
     <Displayed v-bind:displayed="this.info ? this.info.displayed : null" />
-    <h1>Your Hand</h1>
-    <Hand v-bind:hand="this.info ? this.info.hand : null" />
+    <Hand v-bind:hand="this.info ? this.info.hand : null" @move="emitMove" />
 
     <button v-if="this.info ? this.player_turn === this.player_number : false">Call</button>
     <button v-if="this.info ? this.info.can_eat : false">Eat</button>
@@ -26,6 +24,12 @@ export default Vue.extend({
   components: {
     Hand,
     Displayed
+  },
+  methods: {
+    emitMove(event: object) {
+      console.log(event)
+      this.$emit('move',  Object.assign(event, {player: this.player_number}))
+    }
   }
 });
 </script>
