@@ -6,7 +6,7 @@ import "fmt"
 type Move struct {
 	Player     `json:"player"`
 	Action     `json:"action"`
-	Tile       `json:"tile"`
+	Tile       int `json:"tile"`
 	TurnNumber int `json:"turn_number"`
 }
 
@@ -27,9 +27,9 @@ type GameState struct {
 	IsTransitioning bool `json:"is_transitioning"`
 
 	PlayerMap         map[Player]*PlayerState `json:"player_map"`
-	DiscardedTiles    []Tile                  `json:"discarded_tiles"`
-	RemainingTiles    []Tile                  `json:"remaining_tiles"`
-	LastDiscardedTile *Tile                   `json:"last_discarded_tile"`
+	DiscardedTiles    []int                   `json:"discarded_tiles"`
+	RemainingTiles    []int                   `json:"remaining_tiles"`
+	LastDiscardedTile *int                    `json:"last_discarded_tile"`
 }
 
 func NewGameState() GameState {
@@ -53,7 +53,7 @@ func NewGameState() GameState {
 		PlayerTurn:        P0,
 		PrevailingWind:    0,
 		IsTransitioning:   false,
-		DiscardedTiles:    []Tile{},
+		DiscardedTiles:    []int{},
 		LastDiscardedTile: nil,
 	}
 }
@@ -80,14 +80,14 @@ func (gs *GameState) NextTurn(m Move) error {
 		gs.RemainingTiles = ps.Gong(m.Tile, gs.RemainingTiles)
 
 	case InnerGong:
-		gs.RemainingTiles = ps.InnerGong(m.Tile.Suit, m.Tile.Value, gs.RemainingTiles)
+		gs.RemainingTiles = ps.InnerGong(m.Tile, gs.RemainingTiles)
 
 	case Discard:
 		// only player's turn can call discard
 		if gs.PlayerTurn != m.Player {
 			return fmt.Errorf("not your turn to discard")
 		}
-		ps.Discard(m.Tile.ID)
+		ps.Discard(m.Tile)
 		// trigger update of all players
 		for k, v := range gs.PlayerMap {
 			v.ResetStatus()
@@ -119,7 +119,7 @@ func (gs *GameState) NextTurn(m Move) error {
 // !IsTransitioning: a player just took a tile either by:
 // draw/eat/ping/gong.
 // * valid next moves are discard/inner_gong/call
-func (gs *GameState) stateTransit(action Action, player Player, tile *Tile) {
+func (gs *GameState) stateTransit(action Action, player Player, tile *int) {
 	switch action {
 	case Eat, EatLeft, EatRight, Pong, Gong, InnerGong:
 		gs.LastDiscardedTile = nil

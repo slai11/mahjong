@@ -19,7 +19,7 @@ export interface GameState {
 export interface ITile {
     suit: number;
     value: number;
-    id: number;
+    id: string;
 }
 
 export interface IMove {

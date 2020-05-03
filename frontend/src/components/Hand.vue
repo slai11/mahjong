@@ -2,8 +2,8 @@
   <div class="hand">
     <h2>Your Hand</h2>
     <div v-if="this.hand" class="container">
-        <div v-for="tile of this.sortedHand" :key=tile.id>
-            <Tile @click.native="discard(tile)" :value=tile.value :suit=tile.suit :id=tile.id />
+        <div v-for="tile of this.sortedHand" :key=tile>
+            <Tile @click.native="discard(tile)" :id=tile />
         </div>
     </div>
   </div>
@@ -23,11 +23,11 @@ export default Vue.extend({
   computed: {
     sortedHand(): [] {
       const sortedHand = this.hand
-      return sortedHand.sort((a: ITile, b: ITile) => {return a.id - b.id})
+      return sortedHand.sort((a: number, b: number) => {return a - b})
     }
   },
   methods: {
-    discard(t: ITile) {
+    discard(t: number) {
       this.$emit('move', {
         tile: t,
         action: 0

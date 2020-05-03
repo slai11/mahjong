@@ -13,15 +13,11 @@
       <h3>Prevailing wind: {{info.game_state.prevailing_wind}}</h3>
       <h3>Dealer this round: {{info.game_state.starter}}</h3>
       <div v-for="(tile, id) in info.game_state.discarded_tiles" :key="id">
-        <Tile :value="tile.value" :suit="tile.suit" :id="tile.id" />
+        <Tile :id="tile" />
       </div>
 
-      <Tile
-        v-if="info.game_state.last_discarded_tile"
-        :value="info.game_state.last_discarded_tile.value"
-        :suit="info.game_state.last_discarded_tile.suit"
-        :id="info.game_state.last_discarded_tile.id"
-      />
+      <h3>Last Discarded: </h3>>
+      <Tile v-if="info.game_state.last_discarded_tile" :id="info.game_state.last_discarded_tile" />
 
       <Player
         :info="info.game_state.player_map[this.playerNumber]"
