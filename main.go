@@ -8,8 +8,8 @@ import (
 
 func main() {
 
-	m := map[string]*Game{
-		"test": NewGame("test"),
+	m := map[string]*GameHolder{
+		"test": &GameHolder{g: NewGame("test")},
 	}
 
 	server := &Server{

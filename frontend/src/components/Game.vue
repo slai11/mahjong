@@ -41,8 +41,8 @@ export default Vue.extend({
     picked: function (val) {
       this.playerNumber = val
       axios
-        .get<GameStateResponse>(
-          `http://localhost:80/game_state?game_id=${this.gameID}`
+        .post<GameStateResponse>(
+          `http://localhost:80/player_select`, {"game_id": this.gameID, "selection": val}
         )
         .then(response => (this.info = response.data))
         .catch((error) => {
