@@ -9,10 +9,19 @@
     </div>
     <h3>Player: {{ playerNumber }}</h3>
 
+    <div v-if="info" class="game_status">
+      <h3>Prevailing wind: {{info.game_state.prevailing_wind}} </h3>
+      <h3>Dealer this round: {{info.game_state.starter}} </h3>
+    </div>
+
+
     <div v-if="info" class="Board">
-      <h3>Prevailing wind: {{info.game_state.prevailing_wind}}</h3>
-      <h3>Dealer this round: {{info.game_state.starter}}</h3>
-      <div v-for="(tile, id) in info.game_state.discarded_tiles" :key="id">
+
+      <div v-for="(friend, pos) in friendOrder" :key="pos">
+        <FriendInfo :info="info.game_state.player_map[friend]" :player_number="friend" />
+      </div>
+
+      <div v-for="(tile, id) in info.game_state.discarded_tiles" :key="id" class="discardPile">
         <Tile :id="tile" />
       </div>
 
@@ -35,12 +44,13 @@
 import Vue from "vue";
 import axios from "axios";
 import Player from "./Player.vue";
+import FriendInfo from "./FriendInfo.vue";
 import Tile from "./Tile.vue";
 import { GameStateResponse, IMove } from "../models/game_state";
 
 export default Vue.extend({
   name: "Game",
-  components: { Player, Tile },
+  components: { Player, Tile, FriendInfo },
   props: {
     msg: String,
     gameID: String
@@ -70,6 +80,20 @@ export default Vue.extend({
   computed: {
     turnNumber(): number {
       return this.info ? this.info.game_state.turn_number : null;
+    },
+    friendOrder(): number[] {
+      switch (this.playerNumber) {
+        case 0:
+          return [1, 2, 3];
+        case 1:
+          return [2, 3, 0];
+        case 2:
+          return [3, 0, 1];
+        case 3:
+          return [0, 1, 2];
+        default:
+          return [];
+      }
     }
   },
   mounted() {
@@ -126,23 +150,23 @@ export default Vue.extend({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.Board {
+// .Board {
+//   display: flex; /* or inline-flex */
+//   flex-wrap: wrap;
+//   flex-direction: row;
+//   justify-content: flex-start;
+// }
+.discardPile {
+  outline: 1px solid green;
+  width: 1000px;
+  height: 500px;
   display: flex; /* or inline-flex */
   flex-wrap: wrap;
   flex-direction: row;
   justify-content: flex-start;
 }
-
 h3 {
   margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
 }
 a {
   color: #42b983;

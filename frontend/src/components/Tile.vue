@@ -1,6 +1,6 @@
 <template>
   <div class="tile">
-    <h3>{{ tileName }}</h3>
+    {{ tileName }}
   </div>
 </template>
 
@@ -23,13 +23,9 @@ export default Vue.extend({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-h3 {
-  margin: 40px 0 0;
-}
 .tile {
   outline: 2px solid green;
-}
-a {
-  color: #42b983;
+  width: 100px;
+  height: 50px;
 }
 </style>

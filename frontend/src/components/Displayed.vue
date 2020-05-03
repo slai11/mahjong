@@ -1,9 +1,9 @@
 <template>
-  <div class="hand">
+  <div class="displayed">
     <div v-if="this.displayed" class="container">
         <div v-for="(set, idx) of this.displayed" :key=idx>
           <div v-for="tile of set" :key=tile>
-            <Tile :id=tile.id />
+            <Tile :id=tile />
           </div>
         </div>
     </div>
