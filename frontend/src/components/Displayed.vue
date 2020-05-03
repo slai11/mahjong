@@ -1,45 +1,25 @@
 <template>
   <div class="hand">
     <h1>Your Displayed</h1>
-    <h3>{{ prettyDisplayed }}</h3>
+    <div v-if="this.displayed" class="container">
+        <div v-for="(set, idx) of this.displayed" :key=idx>
+          <div v-for="tile of set" :key=tile.id>
+            <Tile :value=tile.value :suit=tile.suit :id=tile.id />
+          </div>
+        </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { Tile } from "../models/game_state";
+import Tile  from "./Tile.vue";
 
 export default Vue.extend({
   name: 'Displayed',
   props: ['displayed'], // list of list
-  computed: {
-      prettyDisplayed(): string[][] {
-          if (this.displayed) {
-              const displayed = this.displayed;
-              console.log(displayed);
-              return displayed.map((ts: Tile[]) => {
-                  return ts.map((t: Tile) => {
-                      switch (t.suit) {
-                      case 0:
-                          return "Bamboo:" + (t.value + 1);
-                      case 1:
-                          return "Coin:" + (t.value + 1);
-                      case 2:
-                          return "Number:" + (t.value + 1);
-                      case 3:
-                          return "Wind:" + (t.value + 1);
-                      case 4:
-                          return "Dragon:" + (t.value + 1);
-                      case 5:
-                          return "Animal:" + (t.value + 1);
-                      case 6:
-                          return "Flower:" + (t.value + 1);
-                  }
-                })
-              });
-          }
-          return [[]];
-      }
+  components: {
+    Tile
   }
 });
 </script>

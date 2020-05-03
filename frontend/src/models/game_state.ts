@@ -1,4 +1,9 @@
-
+export interface GameStateResponse {
+    game_state: GameState;
+    id: string;
+    created_at: string;
+    updated_at: string;
+}
 
 export interface GameState {
     starter: number;

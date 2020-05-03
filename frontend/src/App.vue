@@ -1,18 +1,26 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <Lobby msg="TableSwim Mahjong"/>
+    <Lobby v-model=gameID msg="TableSwim Mahjong"/>
+    <Game :gameID=gameID msg="Table"/>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import Lobby from './components/Lobby.vue';
+import Game from './components/Game.vue';
 
 export default Vue.extend({
   name: 'App',
   components: {
-    Lobby
+    Lobby,
+    Game
+  },
+  data() {
+    return {
+      gameID: ""
+    }
   }
 });
 </script>

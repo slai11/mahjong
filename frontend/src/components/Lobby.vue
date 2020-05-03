@@ -1,44 +1,48 @@
 <template>
   <div class="lobby">
     <h1>{{ msg }}</h1>
-    <button v-on:click="getGameState">Load Game.</button>
-    <Player v-bind:info=playerInfo />
+    <button v-on:click="createGame">Create a Game.</button>
+    <input v-model="input" v-on:keyup.enter="enterGame($event)" placeholder="Enter game ID" />
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue from "vue";
 import axios from "axios";
-import {GameState, Tile} from "../models/game_state";
-import Player from "./Player.vue";
-
-interface GameStateResponse {
-    game_state: GameState;
-    id: string;
-    created_at: string;
-    updated_at: string;
-}
+import { GameStateResponse } from "../models/game_state";
+import uniqueIdGenerator from "../util/uniqueIdGenerator";
 
 export default Vue.extend({
-  name: 'Lobby',
-  components: { Player },
+  name: "Lobby",
+  model: {
+    prop: 'gameID',
+    event: 'change'
+  },
   props: {
     msg: String,
+    gameID: String,
   },
   data() {
-      return {
-          info: null
-      }
-  },
-  computed: {
-      playerInfo(): Tile[] {
-          return this.info ? this.info.game_state.player_map[0] : null
-      },
+    return {
+      info: null,
+      input: "",
+      gameStarted: false,
+    };
   },
   methods: {
-      getGameState() {
-          axios.get<GameStateResponse>('http://localhost:80/game_state?game_id=12').then(response => (this.info = response.data))
-      }
+    createGame() {
+      const id = uniqueIdGenerator();
+      axios
+        .get<GameStateResponse>(`http://localhost:80/game_state?game_id=${id}`)
+        .then(response => (this.$emit('change', response.data.id)));
+    },
+    enterGame(event: any) {
+      axios
+        .get<GameStateResponse>(
+          `http://localhost:80/game_state?game_id=${this.input}`
+        )
+        .then(response => (this.$emit('change', response.data.id)));
+    }
   }
 });
 </script>

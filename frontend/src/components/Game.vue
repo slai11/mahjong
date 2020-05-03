@@ -1,47 +1,73 @@
 <template>
   <div class="Board">
-    <h1>{{ msg }}</h1>
-    <button v-on:click="getGameState">Load Game.</button>
-    <Player v-bind:info=playerInfo :player_turn=playerTurn :player_number=0 />
+    <h1>{{ msg }}: {{this.gameID}}</h1>
+
+    <div v-if="playerNumber === -1">
+      <div v-for="(player, idx) in playerOptions" :key="idx">
+        <input type="radio" id="idx" :value="idx" v-model="picked" />
+        <label for="idx">{{ player }}</label>
+      </div>
+      <span>Picked: {{ playerOptions[picked] }}</span>
+    </div>
+    {{ playerNumber }}
+
+    <Player v-bind:info="playerInfo" :player_turn="playerTurn" :player_number="playerNumber" />
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue from "vue";
 import axios from "axios";
-import {GameState, Tile} from "../models/game_state";
+import { Tile } from "../models/game_state";
 import Player from "./Player.vue";
-
-interface GameStateResponse {
-    game_state: GameState;
-    id: string;
-    created_at: string;
-    updated_at: string;
-}
+import { GameStateResponse } from "../models/game_state";
 
 export default Vue.extend({
-  name: 'Game',
+  name: "Game",
   components: { Player },
   props: {
-    msg: String
+    msg: String,
+    gameID: String
   },
   data() {
-      return {
-          info: null
-      }
+    return {
+      info: null,
+      playerNumber: -1,
+      picked: -1,
+      playerOptions: ['east', 'south', 'west', 'north']
+    };
+  },
+  watch: {
+    picked: function (val) {
+      this.playerNumber = val
+      axios
+        .get<GameStateResponse>(
+          `http://localhost:80/game_state?game_id=${this.gameID}`
+        )
+        .then(response => (this.info = response.data))
+        .catch((error) => {
+            console.log(error);
+            this.playerNumber = -1;
+            alert(`${val} is selected, please choose another.`)
+        });
+    }
   },
   computed: {
-      playerInfo(): Tile[] {
-          return this.info ? this.info.game_state.player_map[0] : null
-      },
-      playerTurn(): Tile[] {
-          return this.info ? this.info.game_state.player_turn : null
-      },
+    playerInfo(): Tile[] {
+      return this.info ? this.info.game_state.player_map[this.playerNumber] : null;
+    },
+    playerTurn(): Tile[] {
+      return this.info ? this.info.game_state.player_turn : null;
+    }
   },
   methods: {
-      getGameState() {
-          axios.get<GameStateResponse>('http://localhost:80/game_state?game_id=12').then(response => (this.info = response.data))
-      }
+    getGameState() {
+      axios
+        .get<GameStateResponse>(
+          `http://localhost:80/game_state?game_id=${this.gameID}`
+        )
+        .then(response => (this.info = response.data));
+    }
   }
 });
 </script>
