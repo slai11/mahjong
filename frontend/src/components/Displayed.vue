@@ -2,8 +2,8 @@
   <div class="hand">
     <div v-if="this.displayed" class="container">
         <div v-for="(set, idx) of this.displayed" :key=idx>
-          <div v-for="tile of set" :key=tile.id>
-            <Tile :value=tile.value :suit=tile.suit :id=tile.id />
+          <div v-for="tile of set" :key=tile>
+            <Tile :id=tile.id />
           </div>
         </div>
     </div>

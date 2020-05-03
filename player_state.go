@@ -247,14 +247,15 @@ func (p *PlayerState) repairHand(tiles []int) []int {
 			// draw 1 new tile
 			x := tiles[0]
 			tiles = tiles[1:]
-			// keep replenishing until not flower or animal
 			xt := TileList[x]
+			// keep replenishing until not flower or animal
 			for xt.Suit == Flower || xt.Suit == Animal {
 				p.Displayed = append(p.Displayed, []int{x})
 
 				// draw another
 				x = tiles[0]
 				tiles = tiles[1:]
+				xt = TileList[x]
 			}
 
 			p.Hand = append(p.Hand, x)

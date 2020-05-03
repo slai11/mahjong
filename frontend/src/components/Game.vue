@@ -16,7 +16,7 @@
         <Tile :id="tile" />
       </div>
 
-      <h3>Last Discarded: </h3>>
+      <h3>Last Discarded: </h3>
       <Tile v-if="info.game_state.last_discarded_tile" :id="info.game_state.last_discarded_tile" />
 
       <Player
