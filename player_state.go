@@ -50,7 +50,7 @@ func (p *PlayerState) Discard(id int) {
 
 // can eat middle or eat side
 func (p *PlayerState) Eat(tile Tile, side Action) {
-	if !p.CanEat {
+	if !(p.CanEat || p.CanEatRight || p.CanEatLeft) {
 		return
 	}
 
@@ -60,31 +60,42 @@ func (p *PlayerState) Eat(tile Tile, side Action) {
 		first = tile.Value - 1
 		second = tile.Value + 1
 	case EatLeft:
-		first = tile.Value - 1
-		second = tile.Value - 2
-	case EatRight:
 		first = tile.Value + 1
 		second = tile.Value + 2
+	case EatRight:
+		first = tile.Value - 1
+		second = tile.Value - 2
 	}
 
 	var eatenFirst, eatenSecond bool
 	triplet := []Tile{tile}
-	for i, h := range p.Hand {
-		if eatenFirst && eatenSecond {
-			break
-		}
+	// bug!
+	i := 0
+	ate := false
+	for _, h := range p.Hand {
 		if tile.Suit == h.Suit {
 			if !eatenFirst && first == h.Value {
 				triplet = append(triplet, h)
 				eatenFirst = true
-				p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
+				ate = true
 			} else if !eatenSecond && second == h.Value {
 				triplet = append(triplet, h)
 				eatenSecond = true
-				p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
+				ate = true
 			}
 		}
+		if !ate {
+			p.Hand[i] = h
+			i++
+		}
+		ate = false
 	}
+	p.Hand = p.Hand[:i]
+
+	if len(triplet) != 3 {
+		panic("NO TRIPLET")
+	}
+
 	p.Displayed = append(p.Displayed, triplet)
 }
 
@@ -159,6 +170,14 @@ func (p *PlayerState) InnerGong(s Suit, v int, tiles []Tile) []Tile {
 	return tiles
 }
 
+func (p *PlayerState) ResetStatus() {
+	p.CanPong = false
+	p.CanGong = false
+	p.CanEat = false
+	p.CanEatLeft = false
+	p.CanEatRight = false
+}
+
 // this happens after drawing
 func (p *PlayerState) UpdateStatus(tile Tile) {
 	matching := 1
@@ -174,16 +193,12 @@ func (p *PlayerState) UpdateStatus(tile Tile) {
 			case Bamboo, Coin, Number:
 				if tile.Value == t.Value+1 {
 					hasBefore = true
-					continue
 				} else if tile.Value == t.Value-1 {
 					hasAfter = true
-					continue
 				} else if tile.Value == t.Value-2 {
 					hasTwoAfter = true
-					continue
 				} else if tile.Value == t.Value+2 {
 					hasTwoBefore = true
-					continue
 				}
 			}
 		}

@@ -3,12 +3,15 @@
     <Displayed v-bind:displayed="this.info ? this.info.displayed : null" />
     <Hand v-bind:hand="this.info ? this.info.hand : null" @move="emitMove" />
 
-    <button v-if="this.info ? this.player_turn === this.player_number : false">Call</button>
-    <button v-if="this.info ? this.info.can_eat : false">Eat</button>
-    <button v-if="this.info ? this.info.can_eat_right : false">Eat Right</button>
-    <button v-if="this.info ? this.info.can_eat_left : false">Eat Left</button>
-    <button v-if="this.info ? this.info.can_pong : false">Pong</button>
-    <button v-if="this.info ? this.info.can_gong : false">Gong</button>
+    <div v-if="this.transiting">
+      <button v-if="this.player_turn === this.player_number" @click="emitInterruptMove(1)" >Draw</button>
+      <button v-if="this.info.can_eat" @click="emitInterruptMove(2)" >Eat</button>
+      <button v-if="this.info.can_eat_right" @click="emitInterruptMove(3)" >Eat Right</button>
+      <button v-if="this.info.can_eat_left" @click="emitInterruptMove(4)" >Eat Left</button>
+      <button v-if="this.info.can_pong" @click="emitInterruptMove(5)" >Pong</button>
+      <button v-if="this.info.can_gong" @click="emitInterruptMove(6)" >Gong</button>
+    </div>
+    <button v-if="this.transiting || this.player_turn === this.player_number" @click="emitInterruptMove(7)" >Call</button>
     <!-- need to display all the possible inner gong options -->
   </div>
 </template>
@@ -20,7 +23,7 @@ import Displayed from "./Displayed.vue";
 
 export default Vue.extend({
   name: "Player",
-  props: ["info", "player_turn", "player_number"],
+  props: ["info", "player_turn", "player_number", "transiting"],
   components: {
     Hand,
     Displayed
@@ -29,6 +32,9 @@ export default Vue.extend({
     emitMove(event: object) {
       console.log(event)
       this.$emit('move',  Object.assign(event, {player: this.player_number}))
+    },
+    emitInterruptMove(action: number) {
+      this.$emit('imove',  {action: action, player: this.player_number});
     }
   }
 });

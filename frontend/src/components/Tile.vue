@@ -29,13 +29,35 @@ export default Vue.extend({
           sname = "Number:" + (this.value + 1);
           break;
         case 3:
-          sname = "Wind";
+          if (this.value == 0) {
+            sname = "East-Wind"
+          } else if (this.value == 1) {
+            sname = "South-Wind"
+          } else if (this.value == 2) {
+            sname = "West-Wind"
+          } else if (this.value == 3) {
+            sname = "North-Wind"
+          }
           break;
         case 4:
-          sname = "Dragon";
+          if (this.value == 0) {
+            sname = "Green-Dragon"
+          } else if (this.value == 1) {
+            sname = "Red-Dragon"
+          } else if (this.value == 2) {
+            sname = "White-Dragon"
+          }
           break;
         case 5:
-          sname = "Animal";
+          if (this.value == 0) {
+            sname = "Centipede"
+          } else if (this.value == 1) {
+            sname = "Chicken"
+          } else if (this.value == 2) {
+            sname = "Cat"
+          } else if (this.value == 3) {
+            sname = "Mouse"
+          }
           break;
         case 6:
           sname = "Flower";

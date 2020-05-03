@@ -90,6 +90,7 @@ func (gs *GameState) NextTurn(m Move) error {
 		ps.Discard(m.Tile.ID)
 		// trigger update of all players
 		for k, v := range gs.PlayerMap {
+			v.ResetStatus()
 			if k != m.Player {
 				v.UpdateStatus(m.Tile)
 			}
@@ -123,6 +124,7 @@ func (gs *GameState) stateTransit(action Action, player Player, tile *Tile) {
 	case Eat, EatLeft, EatRight, Pong, Gong, InnerGong:
 		gs.LastDiscardedTile = nil
 		gs.IsTransitioning = false
+		gs.PlayerTurn = player
 
 	case Draw:
 		gs.IsTransitioning = false
@@ -130,22 +132,17 @@ func (gs *GameState) stateTransit(action Action, player Player, tile *Tile) {
 			gs.DiscardedTiles = append(gs.DiscardedTiles, *gs.LastDiscardedTile)
 			gs.LastDiscardedTile = nil
 		}
+		gs.PlayerTurn = player
+
 	case Discard:
 		gs.IsTransitioning = true
 		if gs.LastDiscardedTile != nil {
 			gs.DiscardedTiles = append(gs.DiscardedTiles, *gs.LastDiscardedTile)
 		}
 		gs.LastDiscardedTile = tile
-	}
-
-	// jumps to player who performed the action. if IsTransitioning, then this doesnt matter anyway
-	if action == Call {
-		gs.PlayerTurn = gs.Starter
-	} else {
-		gs.PlayerTurn = player
+		gs.PlayerTurn = player.next()
 	}
 
 	// ensures turn order correctness
 	gs.TurnNumber += 1
-
 }

@@ -1,7 +1,5 @@
 <template>
-  <div class="Board">
-    <h1>{{ msg }}: {{this.gameID}}</h1>
-
+  <div class="GameDashboard">
     <div v-if="playerNumber === -1">
       <div v-for="(player, idx) in playerOptions" :key="idx">
         <input type="radio" id="idx" :value="idx" v-model="playerNumber" />
@@ -11,27 +9,49 @@
     </div>
     <h3>Player: {{ playerNumber }}</h3>
 
-    <Player :info="info ? info.game_state.player_map[this.playerNumber] : null" :player_turn="playerTurn" :player_number="playerNumber" @move="postMove($event)"/>
+    <div v-if="info" class="Board">
+      <h3>Prevailing wind: {{info.game_state.prevailing_wind}}</h3>
+      <h3>Dealer this round: {{info.game_state.starter}}</h3>
+      <div v-for="(tile, id) in info.game_state.discarded_tiles" :key="id">
+        <Tile :value="tile.value" :suit="tile.suit" :id="tile.id" />
+      </div>
+
+      <Tile
+        v-if="info.game_state.last_discarded_tile"
+        :value="info.game_state.last_discarded_tile.value"
+        :suit="info.game_state.last_discarded_tile.suit"
+        :id="info.game_state.last_discarded_tile.id"
+      />
+
+      <Player
+        :info="info.game_state.player_map[this.playerNumber]"
+        :player_turn="info.game_state.player_turn"
+        :player_number="playerNumber"
+        :transiting="info.game_state.is_transitioning"
+        @move="postMove($event)"
+        @imove="postInterruptMove($event)"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-import { IMove } from "../models/game_state";
 import Player from "./Player.vue";
-import { GameStateResponse } from "../models/game_state";
+import Tile from "./Tile.vue";
+import { GameStateResponse, IMove } from "../models/game_state";
 
 export default Vue.extend({
   name: "Game",
-  components: { Player },
+  components: { Player, Tile },
   props: {
     msg: String,
     gameID: String
   },
   data() {
     return {
-      info: null,
+      info: null, // GameStateResponse
       playerNumber: -1,
       playerOptions: ["east", "south", "west", "north"]
     };
@@ -52,17 +72,15 @@ export default Vue.extend({
     }
   },
   computed: {
-    playerInfo(): object {
-      return this.info
-        ? this.info.game_state.player_map[this.playerNumber]
-        : null;
-    },
-    playerTurn(): number {
-      return this.info ? this.info.game_state.player_turn : null;
-    },
     turnNumber(): number {
       return this.info ? this.info.game_state.turn_number : null;
     }
+  },
+  mounted() {
+    const fn = () => this.getGameState();
+    setInterval(function() {
+      fn();
+    }, 5000);
   },
   methods: {
     getGameState() {
@@ -73,16 +91,34 @@ export default Vue.extend({
         .then(response => (this.info = response.data));
     },
     postMove(event: IMove) {
-      event["turn_number"] = this.turnNumber
+      event["turn_number"] = this.turnNumber;
       axios
         .post<GameStateResponse>(`http://localhost:80/move`, {
           "game_id": this.gameID,
           move: event
         })
         .then(response => {
-          this.info = response.data
-          console.log(this.info)
-          })
+          this.info = response.data;
+          console.log(this.info);
+        })
+        .catch(error => {
+          console.log(error);
+          alert(`Move not allowed`);
+        });
+    },
+    postInterruptMove(event: IMove) {
+      event["turn_number"] = this.turnNumber;
+      event["tile"] = this.info.game_state.last_discarded_tile;
+      console.log(event);
+      axios
+        .post<GameStateResponse>(`http://localhost:80/move`, {
+          "game_id": this.gameID,
+          move: event
+        })
+        .then(response => {
+          this.info = response.data;
+          console.log(this.info);
+        })
         .catch(error => {
           console.log(error);
           alert(`Move not allowed`);
@@ -94,6 +130,13 @@ export default Vue.extend({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+.Board {
+  display: flex; /* or inline-flex */
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
 h3 {
   margin: 40px 0 0;
 }

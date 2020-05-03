@@ -1,8 +1,11 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <Lobby v-model=gameID msg="TableSwim Mahjong"/>
-    <Game :gameID=gameID msg="Table"/>
+    <h1>TableSwim Mahjong</h1>
+    <h2>Table: {{gameID}}</h2>
+    <Lobby v-if="gameID === ''" v-model=gameID />
+    <Game v-else :gameID=gameID msg="Table"/>
+    
   </div>
 </template>
 

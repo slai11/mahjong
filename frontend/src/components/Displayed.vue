@@ -1,6 +1,5 @@
 <template>
   <div class="hand">
-    <h2>Your Displayed</h2>
     <div v-if="this.displayed" class="container">
         <div v-for="(set, idx) of this.displayed" :key=idx>
           <div v-for="tile of set" :key=tile.id>
