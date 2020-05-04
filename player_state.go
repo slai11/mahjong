@@ -106,43 +106,41 @@ func (p *PlayerState) Pong(tile int) {
 		return
 	}
 
-	count := 1
+	newHand := make([]int, 0, len(p.Hand)-2)
 	triplet := []int{tile}
-	for i, h := range p.Hand {
-		if count == 3 {
-			break
-		}
-
+	for _, h := range p.Hand {
 		if TileList[tile].Suit == TileList[h].Suit && TileList[tile].Value == TileList[h].Value {
 			triplet = append(triplet, h)
-			p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
-			count += 1
+		} else {
+			newHand = append(newHand, h)
 		}
 	}
-	p.Displayed = append(p.Displayed, triplet)
+
+	if len(triplet) == 3 {
+		p.Hand = newHand
+		p.Displayed = append(p.Displayed, triplet)
+	}
 }
 
 func (p *PlayerState) Gong(tile int, tiles []int) []int {
-	if !p.CanPong {
+	if !p.CanGong {
 		return tiles
 	}
 
-	count := 1
+	newHand := make([]int, 0, len(p.Hand)-3)
 	triplet := []int{tile}
-	for i, h := range p.Hand {
-		if count == 4 {
-			break
-		}
-
+	for _, h := range p.Hand {
 		if TileList[tile].Suit == TileList[h].Suit && TileList[tile].Value == TileList[h].Value {
 			triplet = append(triplet, h)
-			p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
-			count += 1
+		} else {
+			newHand = append(newHand, h)
 		}
 	}
+
+	p.Hand = newHand
 	p.Displayed = append(p.Displayed, triplet)
 
-	tiles = p.Draw(tiles)
+	tiles = p.Draw(tiles) // always draw tile after a gong
 	return tiles
 }
 
@@ -155,20 +153,17 @@ func (p *PlayerState) InnerGong(t int, tiles []int) []int {
 		return tiles
 	}
 
-	count := 0
 	triplet := []int{}
-	for i, h := range p.Hand {
-		if count == 4 {
-			break
-		}
-
+	newHand := make([]int, 0, len(p.Hand)-4)
+	for _, h := range p.Hand {
 		tile := TileList[h]
 		if s == tile.Suit && v == tile.Value {
 			triplet = append(triplet, h)
-			p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
-			count += 1
+		} else {
+			newHand = append(newHand, h)
 		}
 	}
+	p.Hand = newHand
 	p.Displayed = append(p.Displayed, triplet)
 
 	tiles = p.Draw(tiles)

@@ -10,25 +10,43 @@
     <h3>Player: {{ playerNumber }}</h3>
 
     <div v-if="info" class="game_status">
-      <h3>Prevailing wind: {{info.game_state.prevailing_wind}} </h3>
-      <h3>Dealer this round: {{info.game_state.starter}} </h3>
+      <h3>Prevailing wind: {{info.game_state.prevailing_wind}}</h3>
+      <h3>Dealer this round: {{info.game_state.starter}}</h3>
     </div>
 
+    <div v-if="info" class="container">
+      <FriendInfo
+        class="rightplayer"
+        :info="info.game_state.player_map[friendOrder[0]]"
+        :player_number="friendOrder[0]"
+        :style="friendCss(0)"
+      />
+      <FriendInfo
+        class="oppositeplayer"
+        :info="info.game_state.player_map[friendOrder[1]]"
+        :player_number="friendOrder[1]"
+        :style="friendCss(1)"
+      />
+      <FriendInfo
+        class="leftplayer"
+        :info="info.game_state.player_map[friendOrder[2]]"
+        :player_number="friendOrder[2]"
+        :style="friendCss(2)"
+      />
 
-    <div v-if="info" class="Board">
-
-      <div v-for="(friend, pos) in friendOrder" :key="pos">
-        <FriendInfo :info="info.game_state.player_map[friend]" :player_number="friend" />
+      <div class="discard">
+        <div v-for="(tile, id) in info.game_state.discarded_tiles" :key="id">
+          <Tile :id="tile" />
+        </div>
+        <Tile
+          v-if="info.game_state.last_discarded_tile"
+          :id="info.game_state.last_discarded_tile"
+          :style="{outline: '2px double red'}"
+        />
       </div>
-
-      <div v-for="(tile, id) in info.game_state.discarded_tiles" :key="id" class="discardPile">
-        <Tile :id="tile" />
-      </div>
-
-      <h3>Last Discarded: </h3>
-      <Tile v-if="info.game_state.last_discarded_tile" :id="info.game_state.last_discarded_tile" />
 
       <Player
+        class="player"
         :info="info.game_state.player_map[this.playerNumber]"
         :player_turn="info.game_state.player_turn"
         :player_number="playerNumber"
@@ -59,7 +77,8 @@ export default Vue.extend({
     return {
       info: null, // GameStateResponse
       playerNumber: -1,
-      playerOptions: ["east", "south", "west", "north"]
+      playerOptions: ["east", "south", "west", "north"],
+      playerPos: ["right", "opposite", "leftplayer"]
     };
   },
   watch: {
@@ -103,6 +122,18 @@ export default Vue.extend({
     }, 5000);
   },
   methods: {
+    friendCss(pos: number): object {
+      if (pos == 1) {
+        return {
+          height: "200px",
+          width: "800px"
+        };
+      }
+      return {
+        height: "800px",
+        width: "200px"
+      };
+    },
     getGameState() {
       axios
         .get<GameStateResponse>(
@@ -150,25 +181,44 @@ export default Vue.extend({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-// .Board {
-//   display: flex; /* or inline-flex */
-//   flex-wrap: wrap;
-//   flex-direction: row;
-//   justify-content: flex-start;
-// }
-.discardPile {
-  outline: 1px solid green;
-  width: 1000px;
-  height: 500px;
-  display: flex; /* or inline-flex */
-  flex-wrap: wrap;
-  flex-direction: row;
-  justify-content: flex-start;
-}
 h3 {
   margin: 40px 0 0;
 }
 a {
   color: #42b983;
+}
+
+.oppositeplayer {
+  grid-area: oppositeplayer;
+}
+.discard {
+  grid-area: main;
+  outline: 1px solid green;
+  width: 800px;
+  height: 800px;
+  display: flex; /* or inline-flex */
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.leftplayer {
+  grid-area: leftplayer;
+}
+.rightplayer {
+  grid-area: rightplayer;
+}
+
+.player {
+  grid-area: player;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 300px 800px 300px;
+  grid-template-rows: 300px 800px 300px;
+  grid-template-areas:
+    ". oppositeplayer  ."
+    "leftplayer main rightplayer"
+    "player player player";
 }
 </style>
