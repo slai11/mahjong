@@ -25,7 +25,7 @@ func NewPlayerState(size int, tiles []int) (*PlayerState, []int) {
 
 	ps := PlayerState{Hand: hand, Displayed: [][]int{}, InnerGongMap: make(map[int]int)}
 	tiles = ps.repairHand(tiles)
-
+	ps.updateInnerGMap()
 	return &ps, tiles
 }
 
@@ -149,7 +149,7 @@ func (p *PlayerState) InnerGong(t int, tiles []int) []int {
 	s := tile.Suit
 	v := tile.Value
 	k := int(s)*10 + v
-	if mv, ok := p.InnerGongMap[k]; !ok || mv != v {
+	if mv, ok := p.InnerGongMap[k]; !ok || mv != 4 {
 		return tiles
 	}
 
@@ -277,6 +277,7 @@ func (p *PlayerState) repairHand(tiles []int) []int {
 // only 9 possible values and 7 suits
 // Suit * 10 + Value = tile identifier
 func (p *PlayerState) updateInnerGMap() {
+	p.InnerGongMap = make(map[int]int)
 	for _, t := range p.Hand {
 		tile := TileList[t]
 		k := int(tile.Suit)*10 + tile.Value

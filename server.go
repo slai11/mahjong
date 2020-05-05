@@ -19,13 +19,9 @@ func (s *Server) Start(games map[string]*GameHolder) error {
 
 	// not the most REST-compliant but its straightforward
 	r.Use(CORS)
-
 	r.HandleFunc("/move", s.handleMove)
 	r.HandleFunc("/game_state", s.handleGetState)
 	r.HandleFunc("/player_select", s.handlePlayerSelect)
-	//headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
-	//originsOk := handlers.AllowedOrigins([]string{"*"})
-	//methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 
 	s.Server = http.Server{
 		Addr: ":80",
