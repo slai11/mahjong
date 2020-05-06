@@ -33,13 +33,13 @@ export default Vue.extend({
     createGame() {
       const id = uniqueIdGenerator();
       axios
-        .get<GameStateResponse>(`http://159.65.140.22/game_state?game_id=${id}`)
+        .get<GameStateResponse>(`https://tableswim.com/game_state?game_id=${id}`)
         .then(response => (this.$emit('change', response.data.id)));
     },
     enterGame(event: any) {
       axios
         .get<GameStateResponse>(
-          `http://159.65.140.22/game_state?game_id=${this.input}`
+          `https://tableswim.com/game_state?game_id=${this.input}`
         )
         .then(response => (this.$emit('change', response.data.id)));
     }
