@@ -11,8 +11,12 @@
       <button v-if="this.info.can_pong" @click="emitInterruptMove(5)" >Pong</button>
       <button v-if="this.info.can_gong" @click="emitInterruptMove(6)" >Gong</button>
     </div>
-    <button v-if="this.transiting || this.player_turn === this.player_number" @click="emitInterruptMove(7)" >Call</button>
-    <!-- need to display all the possible inner gong options -->
+    <button v-if="this.transiting || this.player_turn === this.player_number" @click="emitInterruptMove(8)" >Call</button>
+    <div v-for="(value, name) in this.info.inner_gong_map" :key="name">
+      <li v-if="value === 4">
+      <button @click="emitInnerGong(7, innerGongTile(name).id)" >Gong {{innerGongTile(name).name}} </button>
+      </li>
+    </div>
   </div>
 </template>
 
@@ -20,6 +24,7 @@
 import Vue from "vue";
 import Hand from "./Hand.vue";
 import Displayed from "./Displayed.vue";
+import {TileNameMap, UniqueTile} from "../models/tile"
 
 export default Vue.extend({
   name: "Player",
@@ -28,13 +33,23 @@ export default Vue.extend({
     Hand,
     Displayed
   },
+  computed: {
+    possibleGone(): number[][]{
+      return this.info.inner_gong_map.filter((l: number[]) => {l.length === 4})
+    }
+  },
   methods: {
     emitMove(event: object) {
-      console.log(event)
       this.$emit('move',  Object.assign(event, {player: this.player_number}))
     },
     emitInterruptMove(action: number) {
       this.$emit('imove',  {action: action, player: this.player_number});
+    },
+    innerGongTile(name: number): UniqueTile {
+      return TileNameMap[name]
+    },
+    emitInnerGong(action: number, id: string) {
+      this.$emit('move',  {player: this.player_number, action: action, tile: id})
     }
   }
 });

@@ -21,7 +21,4 @@ export default Vue.extend({
 .friend {
     outline: 1px solid green;
 }
-a {
-  color: #42b983;
-}
 </style>

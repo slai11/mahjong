@@ -1,22 +1,18 @@
 <template>
-  <div class="displayed">
-    <div v-if="this.displayed" class="container">
-        <div v-for="(set, idx) of this.displayed" :key=idx>
-          <div v-for="tile of set" :key=tile>
-            <Tile :id=tile />
-          </div>
-        </div>
+  <div v-if="this.displayed" class="container">
+    <div v-for="(tile, idx) of [].concat(...this.displayed)" :key="idx">
+      <Tile :id="tile" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Tile  from "./Tile.vue";
+import Vue from "vue";
+import Tile from "./Tile.vue";
 
 export default Vue.extend({
-  name: 'Displayed',
-  props: ['displayed'], // list of list
+  name: "Displayed",
+  props: ["displayed"],
   components: {
     Tile
   }
@@ -25,16 +21,10 @@ export default Vue.extend({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
+.container {
+  display: flex; /* or inline-flex */
+  flex-direction: row;
+  justify-content: center;
 }
 a {
   color: #42b983;

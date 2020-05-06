@@ -41,9 +41,6 @@ export default Vue.extend({
 .container {
   display: flex; /* or inline-flex */
   flex-direction: row;
-  justify-content: space-evenly
-}
-a {
-  color: #42b983;
+  justify-content: center;
 }
 </style>

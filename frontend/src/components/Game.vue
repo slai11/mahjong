@@ -84,7 +84,7 @@ export default Vue.extend({
   watch: {
     playerNumber: function(val) {
       axios
-        .post<GameStateResponse>(`http://localhost:80/player_select`, {
+        .post<GameStateResponse>(`http://159.65.140.22/player_select`, {
           "game_id": this.gameID,
           selection: val
         })
@@ -116,7 +116,10 @@ export default Vue.extend({
     }
   },
   mounted() {
-    const fn = () => this.getGameState();
+    const fn = () => {
+      if (this.playerNumber != -1) {
+        this.getGameState()
+      }};
     setInterval(function() {
       fn();
     }, 5000);
@@ -137,14 +140,14 @@ export default Vue.extend({
     getGameState() {
       axios
         .get<GameStateResponse>(
-          `http://localhost:80/game_state?game_id=${this.gameID}`
+          `http://159.65.140.22/game_state?game_id=${this.gameID}`
         )
         .then(response => (this.info = response.data));
     },
     postMove(event: IMove) {
       event["turn_number"] = this.turnNumber;
       axios
-        .post<GameStateResponse>(`http://localhost:80/move`, {
+        .post<GameStateResponse>(`http://159.65.140.22/move`, {
           "game_id": this.gameID,
           move: event
         })
@@ -162,7 +165,7 @@ export default Vue.extend({
       event["tile"] = this.info.game_state.last_discarded_tile;
       console.log(event);
       axios
-        .post<GameStateResponse>(`http://localhost:80/move`, {
+        .post<GameStateResponse>(`http://159.65.140.22/move`, {
           "game_id": this.gameID,
           move: event
         })
@@ -181,13 +184,6 @@ export default Vue.extend({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-h3 {
-  margin: 40px 0 0;
-}
-a {
-  color: #42b983;
-}
-
 .oppositeplayer {
   grid-area: oppositeplayer;
 }
