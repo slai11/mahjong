@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
     <h1>TableSwim Mahjong</h1>
     <Lobby v-if="playerNumber === -1"
       :gameID="gameID" 
@@ -38,6 +37,5 @@ export default Vue.extend({
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 </style>

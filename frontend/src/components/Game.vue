@@ -1,11 +1,9 @@
 <template>
   <div class="GameDashboard">
-    <h3>Table Number: {{gameID}} </h3>
-    <h3>Player: {{ playerNumber }}</h3>
-
+    
+    <h3>Table Number: {{gameID}} | Player: {{ playerOptions[playerNumber] }}</h3>
     <div v-if="info" class="game_status">
-      <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}}</h3>
-      <h3>Dealer this round: {{playerOptions[info.game_state.starter]}}</h3>
+      <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}} | Dealer this round: {{playerOptions[info.game_state.starter]}}</h3>
     </div>
 
     <div v-if="info" class="container">
@@ -13,21 +11,18 @@
         class="rightplayer"
         :info="info.game_state.player_map[friendOrder[0]]"
         :playerNumber="friendOrder[0]"
-        :style="friendCss(0)"
         :turnNumber="info.game_state.player_turn"
       />
       <FriendInfo
         class="oppositeplayer"
         :info="info.game_state.player_map[friendOrder[1]]"
         :playerNumber="friendOrder[1]"
-        :style="friendCss(1)"
         :turnNumber="info.game_state.player_turn"
       />
       <FriendInfo
         class="leftplayer"
         :info="info.game_state.player_map[friendOrder[2]]"
         :playerNumber="friendOrder[2]"
-        :style="friendCss(2)"
         :turnNumber="info.game_state.player_turn"
       />
 
@@ -105,18 +100,6 @@ export default Vue.extend({
     }, 5000);
   },
   methods: {
-    friendCss(pos: number): object {
-      if (pos == 1) {
-        return {
-          height: "200px",
-          width: "800px"
-        };
-      }
-      return {
-        height: "800px",
-        width: "200px"
-      };
-    },
     getGameState() {
       axios
         .get<GameStateResponse>(
@@ -164,24 +147,42 @@ export default Vue.extend({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.oppositeplayer {
-  grid-area: oppositeplayer;
-}
 .discard {
   grid-area: main;
   outline: 1px solid green;
-  width: 800px;
-  height: 800px;
+  width: 500px;
+  height: 500px;
   display: flex; /* or inline-flex */
   flex-wrap: wrap;
   flex-direction: row;
   justify-content: flex-start;
 }
+.oppositeplayer {
+  height: 100px;
+  width: 500px;
+  grid-area: oppositeplayer;
+}
 .leftplayer {
   grid-area: leftplayer;
+  height: 100px;
+  width: 500px;
+  place-self: center;
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg);
 }
 .rightplayer {
   grid-area: rightplayer;
+  height: 100px;
+  width: 500px;
+   place-self: center;
+  -webkit-transform: rotate(270deg);
+  -moz-transform: rotate(270deg);
+  -o-transform: rotate(270deg);
+  -ms-transform: rotate(270deg);
+  transform: rotate(270deg);
 }
 
 .player {
@@ -190,8 +191,8 @@ export default Vue.extend({
 
 .container {
   display: grid;
-  grid-template-columns: 300px 800px 300px;
-  grid-template-rows: 300px 800px 300px;
+  grid-template-columns: 300px 500px 300px;
+  grid-template-rows: 150px 500px 300px;
   grid-template-areas:
     ". oppositeplayer  ."
     "leftplayer main rightplayer"

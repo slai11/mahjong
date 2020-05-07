@@ -1,6 +1,8 @@
 <template>
   <div class="lobby">
-    <h1>{{ msg }}</h1>
+    <h3>Step 1: Use the generated ID or paste your friend's table ID</h3>
+    <h3>Step 2: Click "start game"</h3>
+    <br>
     <input v-model="gameid" placeholder="Enter game ID" />
     <button v-on:click="enterGame">Start Game</button>
 
@@ -26,7 +28,6 @@ interface PlayerRegistrationResp {
 export default Vue.extend({
   name: "Lobby",
   props: {
-    msg: String,
     gameID: String
   },
   data() {
@@ -74,16 +75,5 @@ export default Vue.extend({
 <style scoped lang="scss">
 h3 {
   margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
 }
 </style>
