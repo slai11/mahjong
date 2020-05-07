@@ -5,11 +5,12 @@
 
     <div v-if="this.transiting">
       <button v-if="this.player_turn === this.player_number" @click="emitInterruptMove(1)" >Draw</button>
-      <button v-if="this.info.can_eat" @click="emitInterruptMove(2)" >Eat</button>
-      <button v-if="this.info.can_eat_right" @click="emitInterruptMove(3)" >Eat Right</button>
-      <button v-if="this.info.can_eat_left" @click="emitInterruptMove(4)" >Eat Left</button>
       <button v-if="this.info.can_pong" @click="emitInterruptMove(5)" >Pong</button>
       <button v-if="this.info.can_gong" @click="emitInterruptMove(6)" >Gong</button>
+
+      <button v-if="this.player_turn === this.player_number && this.info.can_eat" @click="emitInterruptMove(2)" >Eat</button>
+      <button v-if="this.player_turn === this.player_number &&  this.info.can_eat_right" @click="emitInterruptMove(3)" >Eat Right</button>
+      <button v-if="this.player_turn === this.player_number &&  this.info.can_eat_left" @click="emitInterruptMove(4)" >Eat Left</button>
     </div>
     <button v-if="this.transiting || this.player_turn === this.player_number" @click="emitInterruptMove(8)" >Call</button>
     <div v-for="(value, name) in this.info.inner_gong_map" :key="name">
@@ -40,7 +41,7 @@ export default Vue.extend({
   },
   methods: {
     emitMove(event: object) {
-      if (this.player_number === this.player_turn) {
+      if (this.player_number === this.player_turn && !this.transiting) {
         this.$emit('move',  Object.assign(event, {player: this.player_number}))
       }
     },

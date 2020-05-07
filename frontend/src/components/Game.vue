@@ -3,7 +3,7 @@
     
     <h3>Table Number: {{gameID}} | Player: {{ playerOptions[playerNumber] }}</h3>
     <div v-if="info" class="game_status">
-      <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}} | Dealer this round: {{playerOptions[info.game_state.starter]}}</h3>
+      <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}} | Dealer this round: {{playerOptions[info.game_state.starter]}} | Remaining Tile: {{info.game_state.remaining_tiles.length}}</h3>
     </div>
 
     <div v-if="info" class="container">
@@ -149,13 +149,14 @@ export default Vue.extend({
 <style scoped lang="scss">
 .discard {
   grid-area: main;
-  outline: 1px solid green;
+  outline: 2px solid green;
   width: 500px;
   height: 500px;
   display: flex; /* or inline-flex */
   flex-wrap: wrap;
   flex-direction: row;
   justify-content: flex-start;
+  align-content: space-between;
 }
 .oppositeplayer {
   height: 100px;

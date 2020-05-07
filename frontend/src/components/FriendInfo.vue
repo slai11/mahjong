@@ -19,9 +19,9 @@ export default Vue.extend({
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .friend {
-    outline: 1px solid green;
+    outline: 2px solid green;
 }
 .active {
-    outline: 1px solid red;
+    outline: 3px solid red;
 }
 </style>
