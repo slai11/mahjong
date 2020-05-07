@@ -1,17 +1,11 @@
 <template>
   <div class="GameDashboard">
-    <div v-if="playerNumber === -1">
-      <div v-for="(player, idx) in playerOptions" :key="idx">
-        <input type="radio" id="idx" :value="idx" v-model="playerNumber" />
-        <label for="idx">{{ player }}</label>
-      </div>
-      <span>Picked: {{ playerOptions[playerNumber] }}</span>
-    </div>
+    <h3>Table Number: {{gameID}} </h3>
     <h3>Player: {{ playerNumber }}</h3>
 
     <div v-if="info" class="game_status">
-      <h3>Prevailing wind: {{info.game_state.prevailing_wind}}</h3>
-      <h3>Dealer this round: {{info.game_state.starter}}</h3>
+      <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}}</h3>
+      <h3>Dealer this round: {{playerOptions[info.game_state.starter]}}</h3>
     </div>
 
     <div v-if="info" class="container">
@@ -71,30 +65,15 @@ export default Vue.extend({
   components: { Player, Tile, FriendInfo },
   props: {
     msg: String,
-    gameID: String
+    gameID: String,
+    playerNumber: Number,
   },
   data() {
     return {
       info: null, // GameStateResponse
-      playerNumber: -1,
       playerOptions: ["east", "south", "west", "north"],
       playerPos: ["right", "opposite", "leftplayer"]
     };
-  },
-  watch: {
-    playerNumber: function(val) {
-      axios
-        .post<GameStateResponse>(`https://tableswim.com/player_select`, {
-          "game_id": this.gameID,
-          selection: val
-        })
-        .then(response => (this.info = response.data))
-        .catch(error => {
-          console.log(error);
-          this.playerNumber = -1;
-          alert(`${val} is selected, please choose another.`);
-        });
-    }
   },
   computed: {
     turnNumber(): number {
@@ -116,10 +95,8 @@ export default Vue.extend({
     }
   },
   mounted() {
-    const fn = () => {
-      if (this.playerNumber != -1) {
-        this.getGameState()
-      }};
+    const fn = () => this.getGameState();
+    fn();
     setInterval(function() {
       fn();
     }, 5000);
@@ -140,14 +117,14 @@ export default Vue.extend({
     getGameState() {
       axios
         .get<GameStateResponse>(
-          `https://tableswim.com/game_state?game_id=${this.gameID}`
+          `http://localhost:80/game_state?game_id=${this.gameID}`
         )
         .then(response => (this.info = response.data));
     },
     postMove(event: IMove) {
       event["turn_number"] = this.turnNumber;
       axios
-        .post<GameStateResponse>(`https://tableswim.com/move`, {
+        .post<GameStateResponse>(`http://localhost:80/move`, {
           "game_id": this.gameID,
           move: event
         })
@@ -165,7 +142,7 @@ export default Vue.extend({
       event["tile"] = this.info.game_state.last_discarded_tile;
       console.log(event);
       axios
-        .post<GameStateResponse>(`https://tableswim.com/move`, {
+        .post<GameStateResponse>(`http://localhost:80/move`, {
           "game_id": this.gameID,
           move: event
         })

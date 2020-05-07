@@ -2,10 +2,11 @@
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
     <h1>TableSwim Mahjong</h1>
-    <h2>Table: {{gameID}}</h2>
-    <Lobby v-if="gameID === ''" v-model=gameID />
-    <Game v-else :gameID=gameID msg="Table"/>
-    
+    <Lobby v-if="playerNumber === -1"
+      :gameID="gameID" 
+      @change="gameID = $event"
+      @registered="playerNumber = $event"/>
+    <Game v-else :gameID=gameID :playerNumber=playerNumber msg="Table"/>
   </div>
 </template>
 
@@ -13,16 +14,18 @@
 import Vue from 'vue';
 import Lobby from './components/Lobby.vue';
 import Game from './components/Game.vue';
+import uniqueIdGenerator from "./util/uniqueIdGenerator";
 
 export default Vue.extend({
   name: 'App',
   components: {
     Lobby,
-    Game
+    Game,
   },
   data() {
     return {
-      gameID: ""
+      playerNumber: -1,
+      gameID: uniqueIdGenerator(),
     }
   }
 });

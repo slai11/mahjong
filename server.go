@@ -21,7 +21,7 @@ func (s *Server) Start(games map[string]*GameHolder) error {
 	r.Use(CORS)
 	r.HandleFunc("/move", s.handleMove)
 	r.HandleFunc("/game_state", s.handleGetState)
-	r.HandleFunc("/player_select", s.handlePlayerSelect)
+	r.HandleFunc("/player", s.handlePlayerSelect)
 
 	s.Server = http.Server{
 		Addr: ":80",
@@ -32,7 +32,7 @@ func (s *Server) Start(games map[string]*GameHolder) error {
 	s.games = games
 
 	go func() {
-		for range time.Tick(86400 * time.Minute) {
+		for range time.Tick(3600 * time.Minute) {
 			s.cleanupOldGames()
 		}
 	}()
@@ -48,7 +48,6 @@ func (s *Server) handleGetState(rw http.ResponseWriter, req *http.Request) {
 
 	gh, ok := s.games[gameID]
 	if !ok {
-		// TODO set number of games that we can concurrently manage
 		gh = &GameHolder{g: NewGame(gameID)}
 		s.games[gameID] = gh
 	}
@@ -85,33 +84,24 @@ func (s *Server) handleMove(rw http.ResponseWriter, req *http.Request) {
 	writeJSON(rw, gh.Get())
 }
 
-// POST  player_select
+// GET player
 func (s *Server) handlePlayerSelect(rw http.ResponseWriter, req *http.Request) {
-	var request struct {
-		GameID    string `json:"game_id"`
-		Index     int    `json:"index"`
-		Selection int    `json:"selection"`
-	}
+	q := req.URL.Query()
+	gameID := q.Get("game_id")
 
-	decoder := json.NewDecoder(req.Body)
-	if err := decoder.Decode(&request); err != nil {
-		http.Error(rw, "Error decoding", 400)
-		return
-	}
-
-	gh, ok := s.games[request.GameID]
+	gh, ok := s.games[gameID]
 	if !ok {
 		http.Error(rw, "No such game", 404)
 		return
 	}
 
-	err := gh.SelectPlayer(request.Selection)
+	playerID, err := gh.SelectPlayer()
 	if err != nil {
 		http.Error(rw, err.Error(), 400)
 		return
 	}
 
-	writeJSON(rw, gh.Get())
+	writeJSON(rw, map[string]int{"assigned_number": playerID})
 }
 
 func (s *Server) cleanupOldGames() {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -12,21 +13,19 @@ type Game struct {
 	ID               string    `json:"id"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
-	PlayersAvailable map[int]bool
+	PlayersAvailable []int     `json:"players_available"`
 }
 
 func NewGame(id string) *Game {
+	p := []int{0, 1, 2, 3}
+	rand.Seed(time.Now().Unix())
+	rand.Shuffle(len(p), func(i, j int) { p[i], p[j] = p[j], p[i] })
 	return &Game{
-		GameState: NewGameState(),
-		ID:        id,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		PlayersAvailable: map[int]bool{
-			0: true,
-			1: true,
-			2: true,
-			3: true,
-		},
+		GameState:        NewGameState(),
+		ID:               id,
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
+		PlayersAvailable: p,
 	}
 }
 
@@ -35,15 +34,15 @@ func (g *Game) ProcessMove(m Move) error {
 	return g.GameState.NextTurn(m)
 }
 
-func (g *Game) ProcessSelection(m int) error {
+func (g *Game) ProcessSelection() (int, error) {
 	g.UpdatedAt = time.Now()
-	avail, ok := g.PlayersAvailable[m]
-	if !ok || !avail {
-		return fmt.Errorf("Player Not Available")
-	}
 
-	g.PlayersAvailable[m] = false
-	return nil
+	if len(g.PlayersAvailable) == 0 {
+		return -1, fmt.Errorf("Player Not Available")
+	}
+	pos := g.PlayersAvailable[0]
+	g.PlayersAvailable = g.PlayersAvailable[1:]
+	return pos, nil
 }
 
 // context-free holder that prevents access when writing
@@ -64,8 +63,8 @@ func (gh *GameHolder) Get() *Game {
 	return gh.g
 }
 
-func (gh *GameHolder) SelectPlayer(selection int) error {
+func (gh *GameHolder) SelectPlayer() (int, error) {
 	gh.mu.Lock()
 	defer gh.mu.Unlock()
-	return gh.g.ProcessSelection(selection)
+	return gh.g.ProcessSelection()
 }
