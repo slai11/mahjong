@@ -2,16 +2,18 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 type Server struct {
 	Server http.Server
 	games  map[string]*GameHolder
+	mu     sync.RWMutex
 }
 
 func (s *Server) Start(games map[string]*GameHolder) error {
@@ -24,15 +26,14 @@ func (s *Server) Start(games map[string]*GameHolder) error {
 	r.HandleFunc("/player", s.handlePlayerSelect)
 
 	s.Server = http.Server{
-		Addr: ":80",
-		//Handler: handlers.CORS(originsOk, headersOk, methodsOk)(r),
+		Addr:    ":80",
 		Handler: r,
 	}
 
 	s.games = games
 
 	go func() {
-		for range time.Tick(3600 * time.Minute) {
+		for range time.Tick(30 * time.Minute) {
 			s.cleanupOldGames()
 		}
 	}()
@@ -46,8 +47,14 @@ func (s *Server) handleGetState(rw http.ResponseWriter, req *http.Request) {
 	q := req.URL.Query()
 	gameID := q.Get("game_id")
 
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	gh, ok := s.games[gameID]
 	if !ok {
+		log.WithFields(log.Fields{
+			"method": "handleGetState",
+		}).Info("Not found, creating new game: ", gameID)
+
 		gh = &GameHolder{g: NewGame(gameID)}
 		s.games[gameID] = gh
 	}
@@ -69,6 +76,10 @@ func (s *Server) handleMove(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// read lock on the gamesMap but internally, "move" will acquire its own
+	// write lock for updating game state
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	gh, ok := s.games[request.GameID]
 	if !ok {
 		http.Error(rw, "No such game", 404)
@@ -85,18 +96,27 @@ func (s *Server) handleMove(rw http.ResponseWriter, req *http.Request) {
 }
 
 // GET player
+// not locking here because it is unlikely to be deleted since its new
 func (s *Server) handlePlayerSelect(rw http.ResponseWriter, req *http.Request) {
 	q := req.URL.Query()
 	gameID := q.Get("game_id")
 
 	gh, ok := s.games[gameID]
 	if !ok {
+		log.WithFields(log.Fields{
+			"method": "handlePlayerSelect",
+		}).Error("Game not found: ", gameID)
+
 		http.Error(rw, "No such game", 404)
 		return
 	}
 
 	playerID, err := gh.SelectPlayer()
 	if err != nil {
+		log.WithFields(log.Fields{
+			"method": "handlePlayerSelect",
+		}).Error(err)
+
 		http.Error(rw, err.Error(), 400)
 		return
 	}
@@ -105,10 +125,25 @@ func (s *Server) handlePlayerSelect(rw http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) cleanupOldGames() {
-	for _, v := range s.games {
-		fmt.Println(v)
-		//if v.UpdatedAt()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	log.WithFields(log.Fields{
+		"method": "cleanupOldGames",
+	}).Info("Locking map to clean up. Number of games: ", len(s.games))
+
+	for k, v := range s.games {
+		// game inactive for an hour
+		if v.g.UpdatedAt.Add(1 * time.Hour).Before(time.Now()) {
+			log.WithFields(log.Fields{
+				"method": "cleanupOldGames",
+			}).Warn("Deleting inactive game: ", k)
+
+			delete(s.games, k)
+		}
 	}
+	log.WithFields(log.Fields{
+		"method": "cleanupOldGames",
+	}).Info("Done with clean up")
 }
 
 func writeJSON(rw http.ResponseWriter, resp interface{}) {

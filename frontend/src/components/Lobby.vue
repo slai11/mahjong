@@ -43,7 +43,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    enterGame(event: any) {
+    enterGame() {
       axios
         .get<GameStateResponse>(
           `http://localhost:80/game_state?game_id=${this.gameid}`

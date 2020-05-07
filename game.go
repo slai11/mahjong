@@ -52,6 +52,7 @@ type GameHolder struct {
 }
 
 func (gh *GameHolder) Update(m Move) error {
+	// changes game state, hence write lock
 	gh.mu.Lock()
 	defer gh.mu.Unlock()
 	return gh.g.ProcessMove(m)
@@ -64,6 +65,7 @@ func (gh *GameHolder) Get() *Game {
 }
 
 func (gh *GameHolder) SelectPlayer() (int, error) {
+	// mutates game state, hence write lock
 	gh.mu.Lock()
 	defer gh.mu.Unlock()
 	return gh.g.ProcessSelection()
