@@ -23,9 +23,7 @@ services:
 
   tableswim:
     restart: always
-    build:
-      dockerfile: Dockerfile
-      context: .
+    image: slai11/mahjong:latest
     environment:
       - VIRTUAL_HOST=tableswim.com
       - LETSENCRYPT_HOST=tableswim.com
