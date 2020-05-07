@@ -33,29 +33,13 @@ type GameState struct {
 }
 
 func NewGameState() GameState {
-	tiles := initSet()
-	pMap := make(map[Player]*PlayerState)
-	for _, p := range []Player{P0, P1, P2, P3} {
-		handSize := 13
-		if p == P0 {
-			handSize = 14
-		}
-
-		ps, leftover := NewPlayerState(handSize, tiles)
-		pMap[p] = ps
-		tiles = leftover
+	// raw game state: prevailing wind
+	gs := GameState{
+		PrevailingWind: 0,
+		TurnNumber:     0,
 	}
-
-	return GameState{
-		RemainingTiles:    tiles,
-		PlayerMap:         pMap,
-		Starter:           P0,
-		PlayerTurn:        P0,
-		PrevailingWind:    0,
-		IsTransitioning:   false,
-		DiscardedTiles:    []int{},
-		LastDiscardedTile: nil,
-	}
+	gs.resetBoard(P0)
+	return gs
 }
 
 // Draw -> {Discard, Gong}
@@ -97,19 +81,48 @@ func (gs *GameState) NextTurn(m Move) error {
 		}
 
 	case Call:
-		// reset everything
 		// move to next player
 		if m.Player != gs.Starter { // check for "diao zhng"
 			gs.Starter = gs.Starter.next()
+			// advance wind if need
 			if gs.Starter == P0 {
-				gs.PrevailingWind.next()
+				gs.PrevailingWind = gs.PrevailingWind.next()
 			}
 		}
+
+		// reset everything
+		gs.resetBoard(gs.Starter)
 	}
 
 	gs.stateTransit(m.Action, m.Player, &m.Tile)
 
 	return nil
+}
+
+// resets board to with `start` being the dealer
+// only prevailing wind and turn number is not set here
+func (gs *GameState) resetBoard(dealer Player) {
+	tiles := initSet()
+	pMap := make(map[Player]*PlayerState)
+	for _, p := range []Player{P0, P1, P2, P3} {
+		handSize := 13
+		if p == dealer {
+			handSize = 14
+		}
+
+		ps, leftover := NewPlayerState(handSize, tiles)
+		pMap[p] = ps
+		tiles = leftover
+	}
+
+	gs.Starter = dealer
+	gs.PlayerTurn = dealer
+	gs.IsTransitioning = false
+	gs.DiscardedTiles = []int{}
+	gs.PlayerMap = pMap
+	gs.RemainingTiles = tiles
+	gs.LastDiscardedTile = nil
+
 }
 
 // Reflects state of the game
