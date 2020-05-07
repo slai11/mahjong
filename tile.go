@@ -27,6 +27,7 @@ func initSet() []int {
 	}
 	rand.Seed(time.Now().Unix())
 	rand.Shuffle(len(mj), func(i, j int) { mj[i], mj[j] = mj[j], mj[i] })
+	rand.Shuffle(len(mj), func(i, j int) { mj[i], mj[j] = mj[j], mj[i] })
 	return mj
 }
 
