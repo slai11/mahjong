@@ -40,7 +40,9 @@ export default Vue.extend({
   },
   methods: {
     emitMove(event: object) {
-      this.$emit('move',  Object.assign(event, {player: this.player_number}))
+      if (this.player_number === this.player_turn) {
+        this.$emit('move',  Object.assign(event, {player: this.player_number}))
+      }
     },
     emitInterruptMove(action: number) {
       this.$emit('imove',  {action: action, player: this.player_number});

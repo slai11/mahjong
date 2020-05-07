@@ -1,8 +1,8 @@
 <template>
   <div class="lobby">
     <h1>{{ msg }}</h1>
-    <button v-on:click="createGame">Create a Game.</button>
-    <input v-model="input" v-on:keyup.enter="enterGame($event)" placeholder="Enter game ID" />
+    <input v-model="input" placeholder="Enter game ID" />
+    <button v-on:click="enterGame"> Start Game </button>
   </div>
 </template>
 
@@ -25,17 +25,11 @@ export default Vue.extend({
   data() {
     return {
       info: null,
-      input: "",
+      input: uniqueIdGenerator(),
       gameStarted: false,
     };
   },
   methods: {
-    createGame() {
-      const id = uniqueIdGenerator();
-      axios
-        .get<GameStateResponse>(`https://tableswim.com/game_state?game_id=${id}`)
-        .then(response => (this.$emit('change', response.data.id)));
-    },
     enterGame(event: any) {
       axios
         .get<GameStateResponse>(
