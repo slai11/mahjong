@@ -47,13 +47,13 @@ export default Vue.extend({
     enterGame() {
       axios
         .get<GameStateResponse>(
-          `https://tableswim.xyz/game_state?game_id=${this.gameid}`
+          `${process.env.VUE_APP_BACKEND_URL}/game_state?game_id=${this.gameid}`
         )
         .then(response => {
           this.$emit("change", response.data.id);
           axios
             .post<PlayerRegistrationResp>(
-              `https://tableswim.xyz/player?game_id=${this.gameid}`
+              `${process.env.VUE_APP_BACKEND_URL}/player?game_id=${this.gameid}`
             )
             .then(
               response => {

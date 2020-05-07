@@ -103,14 +103,14 @@ export default Vue.extend({
     getGameState() {
       axios
         .get<GameStateResponse>(
-          `https://tableswim.xyz/game_state?game_id=${this.gameID}`
+          `${process.env.VUE_APP_BACKEND_URL}/game_state?game_id=${this.gameID}`
         )
         .then(response => (this.info = response.data));
     },
     postMove(event: IMove) {
       event["turn_number"] = this.turnNumber;
       axios
-        .post<GameStateResponse>(`https://tableswim.xyz/move`, {
+        .post<GameStateResponse>(`${process.env.VUE_APP_BACKEND_URL}/move`, {
           "game_id": this.gameID,
           move: event
         })
@@ -128,7 +128,7 @@ export default Vue.extend({
       event["tile"] = this.info.game_state.last_discarded_tile;
       console.log(event);
       axios
-        .post<GameStateResponse>(`https://tableswim.xyz/move`, {
+        .post<GameStateResponse>(`${process.env.VUE_APP_BACKEND_URL}/move`, {
           "game_id": this.gameID,
           move: event
         })
