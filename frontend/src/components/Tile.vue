@@ -1,8 +1,5 @@
 <template>
-    <!-- <img class="tile" :src="`/tiles/${tileName}.jpg`"> -->
-    <div class="tile">
-      {{tileName}}
-    </div>
+    <img class="tile" :src="`/tiles/${tileName}.jpg`">
 </template>
 
 <script lang="ts">
@@ -25,8 +22,8 @@ export default Vue.extend({
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .tile {
-  outline: 1px solid green;
-  width: 70px;
-  height: 100px;
+  outline: 2px solid green;
+  width: 50px;
+  height: 80px;
 }
 </style>
