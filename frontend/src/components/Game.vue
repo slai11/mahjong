@@ -12,20 +12,23 @@
       <FriendInfo
         class="rightplayer"
         :info="info.game_state.player_map[friendOrder[0]]"
-        :player_number="friendOrder[0]"
+        :playerNumber="friendOrder[0]"
         :style="friendCss(0)"
+        :turnNumber="info.game_state.player_turn"
       />
       <FriendInfo
         class="oppositeplayer"
         :info="info.game_state.player_map[friendOrder[1]]"
-        :player_number="friendOrder[1]"
+        :playerNumber="friendOrder[1]"
         :style="friendCss(1)"
+        :turnNumber="info.game_state.player_turn"
       />
       <FriendInfo
         class="leftplayer"
         :info="info.game_state.player_map[friendOrder[2]]"
-        :player_number="friendOrder[2]"
+        :playerNumber="friendOrder[2]"
         :style="friendCss(2)"
+        :turnNumber="info.game_state.player_turn"
       />
 
       <div class="discard">
