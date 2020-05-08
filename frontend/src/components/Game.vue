@@ -1,9 +1,9 @@
 <template>
   <div class="GameDashboard">
     
-    <h3>Table Number: {{gameID}} | Player: {{ playerOptions[playerNumber] }}</h3>
+    <h3>Table Number: {{gameID}} | You are {{ playerWind }}</h3>
     <div v-if="info" class="game_status">
-      <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}} | Dealer this round: player {{info.game_state.starter}} | Remaining Tile: {{info.game_state.remaining_tiles.length}}</h3>
+      <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}} |  | Remaining Tile: {{info.game_state.remaining_tiles.length}}</h3>
     </div>
 
     <div v-if="showWinningHand" class="text-center">
@@ -85,6 +85,29 @@ export default Vue.extend({
     };
   },
   computed: {
+    playerWind(): string {
+      if (!this.info) {
+        return ".....loading"
+      }
+      const pos = this.info.game_state.starter - this.playerNumber;
+      switch (pos) {
+        case 0:
+          return "east";
+        case 2:
+          return "west";
+        case -2:
+          return "west";
+        case 1:
+          return "north";
+        case -3:
+          return "north";
+        case -1:
+          return "south";
+        case 3:
+          return "south";
+      }
+      return "BUG. Pls screenshot and file an issue on github.com/slai11/mahjong"
+    },
     turnNumber(): number {
       return this.info ? this.info.game_state.turn_number : null;
     },
