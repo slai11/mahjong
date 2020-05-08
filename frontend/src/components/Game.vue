@@ -3,7 +3,7 @@
     
     <h3>Table Number: {{gameID}} | Player: {{ playerOptions[playerNumber] }}</h3>
     <div v-if="info" class="game_status">
-      <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}} | Dealer this round: {{playerOptions[info.game_state.starter]}} | Remaining Tile: {{info.game_state.remaining_tiles.length}}</h3>
+      <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}} | Dealer this round: player {{info.game_state.starter}} | Remaining Tile: {{info.game_state.remaining_tiles.length}}</h3>
     </div>
 
     <div v-if="showWinningHand" class="text-center">
@@ -168,8 +168,8 @@ export default Vue.extend({
 .discard {
   grid-area: main;
   outline: 2px solid green;
-  width: 500px;
-  height: 500px;
+  width: 700px;
+  height: 700px;
   display: flex; /* or inline-flex */
   flex-wrap: wrap;
   flex-direction: row;
@@ -178,13 +178,13 @@ export default Vue.extend({
 }
 .oppositeplayer {
   height: 100px;
-  width: 500px;
+  width: 700px;
   grid-area: oppositeplayer;
 }
 .leftplayer {
   grid-area: leftplayer;
   height: 100px;
-  width: 500px;
+  width: 700px;
   place-self: center;
   -webkit-transform: rotate(90deg);
   -moz-transform: rotate(90deg);
@@ -195,7 +195,7 @@ export default Vue.extend({
 .rightplayer {
   grid-area: rightplayer;
   height: 100px;
-  width: 500px;
+  width: 700px;
    place-self: center;
   -webkit-transform: rotate(270deg);
   -moz-transform: rotate(270deg);
@@ -210,8 +210,8 @@ export default Vue.extend({
 
 .container {
   display: grid;
-  grid-template-columns: 300px 500px 300px;
-  grid-template-rows: 150px 500px 300px;
+  grid-template-columns: 300px 700px 300px;
+  grid-template-rows: 150px 700px 300px;
   grid-template-areas:
     ". oppositeplayer  ."
     "leftplayer main rightplayer"
