@@ -30,13 +30,16 @@ type GameState struct {
 	DiscardedTiles    []int                   `json:"discarded_tiles"`
 	RemainingTiles    []int                   `json:"remaining_tiles"`
 	LastDiscardedTile *int                    `json:"last_discarded_tile"`
+	LastWinningHand   []int                   `json:"last_winning_hand"`
+	LastWinningTurn   int                     `json:"last_winning_turn"`
 }
 
 func NewGameState() GameState {
 	// raw game state: prevailing wind
 	gs := GameState{
-		PrevailingWind: 0,
-		TurnNumber:     0,
+		PrevailingWind:  0,
+		TurnNumber:      0,
+		LastWinningTurn: -1,
 	}
 	gs.resetBoard(P0)
 	return gs
@@ -89,6 +92,15 @@ func (gs *GameState) NextTurn(m Move) error {
 				gs.PrevailingWind = gs.PrevailingWind.next()
 			}
 		}
+
+		// record winner
+		gs.LastWinningHand = ps.Hand
+		for _, d := range ps.Displayed {
+			gs.LastWinningHand = append(gs.LastWinningHand, d...)
+		}
+
+		// display winning hand only for next turn
+		gs.LastWinningTurn = gs.TurnNumber + 1
 
 		// reset everything
 		gs.resetBoard(gs.Starter)

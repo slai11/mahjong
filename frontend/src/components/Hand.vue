@@ -1,6 +1,6 @@
 <template>
   <div class="hand">
-    <h2>Your Hand</h2>
+    <h2>{{msg}}</h2>
     <div v-if="this.hand" class="container">
         <div v-for="tile of this.sortedHand" :key=tile>
             <Tile @click.native="discard(tile)" :id=tile />
@@ -15,7 +15,7 @@ import Tile  from "./Tile.vue";
 
 export default Vue.extend({
   name: 'Hand',
-  props: ['hand'],
+  props: ['hand', 'msg'],
   components: {
       Tile
   },

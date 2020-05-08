@@ -6,6 +6,14 @@
       <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}} | Dealer this round: {{playerOptions[info.game_state.starter]}} | Remaining Tile: {{info.game_state.remaining_tiles.length}}</h3>
     </div>
 
+    <div v-if="showWinningHand" class="text-center">
+      <v-dialog v-model="showWinningHand" width="800">
+        <v-card>
+          <Hand :msg="'Winner\'s hand'" :hand="this.info ? this.info.game_state.last_winning_hand : null" />
+        </v-card>
+      </v-dialog>
+    </div>
+
     <div v-if="info" class="container">
       <FriendInfo
         class="rightplayer"
@@ -56,11 +64,12 @@ import axios from "axios";
 import Player from "./Player.vue";
 import FriendInfo from "./FriendInfo.vue";
 import Tile from "./Tile.vue";
+import Hand from "./Hand.vue";
 import { GameStateResponse, IMove } from "../models/game_state";
 
 export default Vue.extend({
   name: "Game",
-  components: { Player, Tile, FriendInfo },
+  components: { Player, Tile, FriendInfo, Hand },
   props: {
     msg: String,
     gameID: String,
@@ -70,7 +79,9 @@ export default Vue.extend({
     return {
       info: null, // GameStateResponse
       playerOptions: ["east", "south", "west", "north"],
-      playerPos: ["right", "opposite", "leftplayer"]
+      playerPos: ["right", "opposite", "leftplayer"],
+      showWinningHand: false,
+      lastShownWinningHand: -1
     };
   },
   computed: {
@@ -105,7 +116,14 @@ export default Vue.extend({
         .get<GameStateResponse>(
           `${process.env.VUE_APP_BACKEND_URL}/game_state?game_id=${this.gameID}`
         )
-        .then(response => (this.info = response.data));
+        .then(response => {
+          this.info = response.data
+          // only update dialog status when its not true, else you will close the box while player is still viewing
+          if (!this.showWinningHand) {
+            this.showWinningHand = this.info.game_state.turn_number === this.info.game_state.last_winning_turn && this.info.game_state.turn_number !== this.lastShownWinningHand
+            this.lastShownWinningHand = this.info.game_state.last_winning_turn
+          }
+        });
     },
     postMove(event: IMove) {
       event["turn_number"] = this.turnNumber;
