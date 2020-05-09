@@ -5,15 +5,15 @@
 
 
     <div v-if="this.transiting">
-      <button v-if="this.player_turn === this.player_number" @click="emitInterruptMove(1)" >Draw</button>
-      <button v-if="this.info.can_pong" @click="emitInterruptMove(5)" >Pong</button>
-      <button v-if="this.info.can_gong" @click="emitInterruptMove(6)" >Gong</button>
+      <v-btn v-if="this.player_turn === this.player_number" @click="emitInterruptMove(1)" >Draw</v-btn>
+      <v-btn v-if="this.info.can_pong" @click="emitInterruptMove(5)" >Pong</v-btn>
+      <v-btn v-if="this.info.can_gong" @click="emitInterruptMove(6)" >Gong</v-btn>
 
-      <button v-if="this.player_turn === this.player_number && this.info.can_eat" @click="emitInterruptMove(2)" >Eat</button>
-      <button v-if="this.player_turn === this.player_number &&  this.info.can_eat_right" @click="emitInterruptMove(3)" >Eat Right</button>
-      <button v-if="this.player_turn === this.player_number &&  this.info.can_eat_left" @click="emitInterruptMove(4)" >Eat Left</button>
+      <v-btn v-if="this.player_turn === this.player_number && this.info.can_eat" @click="emitInterruptMove(2)" >Eat</v-btn>
+      <v-btn v-if="this.player_turn === this.player_number &&  this.info.can_eat_right" @click="emitInterruptMove(3)" >Eat Right</v-btn>
+      <v-btn v-if="this.player_turn === this.player_number &&  this.info.can_eat_left" @click="emitInterruptMove(4)" >Eat Left</v-btn>
     </div>
-    <button v-if="this.transiting || this.player_turn === this.player_number"  @click="dialog = true">Call</button>
+    <v-btn v-if="this.transiting || this.player_turn === this.player_number"  @click="dialog = true">Call</v-btn>
 
     <v-row justify="center">
       <v-dialog v-model="dialog" persistent max-width="400">
@@ -31,7 +31,7 @@
 
     <div v-for="(value, name) in this.info.inner_gong_map" :key="name">
       <li v-if="value === 4">
-        <button @click="emitInnerGong(7, innerGongTile(name).id)">Gong {{innerGongTile(name).name}}</button>
+        <v-btn @click="emitInnerGong(7, innerGongTile(name).id)">Gong {{innerGongTile(name).name}}</v-btn>
       </li>
     </div>
   </div>

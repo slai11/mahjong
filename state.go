@@ -32,12 +32,16 @@ type GameState struct {
 
 	IsTransitioning bool `json:"is_transitioning"`
 
+	// all tiles in player map(hand and displayed), discarded, remaining and last discarded
+	// must be unique and be of len 148
 	PlayerMap         map[Player]*PlayerState `json:"player_map"`
 	DiscardedTiles    []int                   `json:"discarded_tiles"`
 	RemainingTiles    []int                   `json:"remaining_tiles"`
 	LastDiscardedTile *int                    `json:"last_discarded_tile"`
-	LastWinningHand   `json:"last_winning_hand"`
-	LastWinningTurn   int `json:"last_winning_turn"`
+
+	// records each round's winning metadata for player viewing
+	LastWinningHand `json:"last_winning_hand"`
+	LastWinningTurn int `json:"last_winning_turn"`
 }
 
 func NewGameState() GameState {

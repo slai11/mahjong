@@ -165,11 +165,10 @@ export default Vue.extend({
         })
         .then(response => {
           this.info = response.data;
-          console.log(this.info);
         })
         .catch(error => {
           console.log(error);
-          alert(`Move not allowed`);
+          alert(`Move not allowed: ${error}`);
         });
     },
     postInterruptMove(event: IMove) {
@@ -183,11 +182,10 @@ export default Vue.extend({
         })
         .then(response => {
           this.info = response.data;
-          console.log(this.info);
         })
         .catch(error => {
           console.log(error);
-          alert(`Move not allowed`);
+          alert(`Move not allowed: ${error}`);
         });
     }
   }

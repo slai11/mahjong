@@ -5,7 +5,7 @@
     <h3>Step 2: Click "start game"</h3>
     <br>
     <input v-model="gameid" placeholder="Enter game ID" />
-    <button v-on:click="enterGame">Start Game</button>
+    <v-btn v-on:click="enterGame">Start Game</v-btn>
 
     <div v-if="gameFull">
       <h3>Game is full. Did you disconnect? Select player to rejoin as:</h3>
