@@ -76,9 +76,11 @@ func (gs *GameState) NextTurn(m Move) error {
 
 	case Gong:
 		gs.RemainingTiles = ps.Gong(m.Tile, gs.RemainingTiles)
+		gs.RemainingTiles = ps.repairHand(gs.RemainingTiles)
 
 	case InnerGong:
 		gs.RemainingTiles = ps.InnerGong(m.Tile, gs.RemainingTiles)
+		gs.RemainingTiles = ps.repairHand(gs.RemainingTiles)
 
 	case Discard:
 		// only player's turn can call discard
