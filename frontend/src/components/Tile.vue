@@ -27,7 +27,7 @@ export default Vue.extend({
 <style scoped lang="scss">
 .tile {
   outline: 2px solid green;
-  width: 40px;
-  height: 70px;
+  width: 35px;
+  height: 60px;
 }
 </style>

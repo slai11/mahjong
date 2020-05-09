@@ -1,6 +1,5 @@
 <template>
   <div data-app id="app">
-    <h1>TableSwim Mahjong</h1>
     <Lobby v-if="playerNumber === -1"
       :gameID="gameID" 
       @change="gameID = $event"

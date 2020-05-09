@@ -1,10 +1,6 @@
 <template>
   <div class="GameDashboard">
-    
-    <h3>Table Number: {{gameID}} | You are player {{this.playerNumber + 1}} ({{ playerWind }})</h3>
-    <div v-if="info" class="game_status">
-      <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}} |  | Remaining Tile: {{info.game_state.remaining_tiles.length}}</h3>
-    </div>
+    <h3>Table Number: {{gameID}} | You are player {{this.playerNumber + 1}} ({{ playerWind }}) | Prevailing wind: {{prevailingWind}} |  | Remaining Tile: {{remainingTileCount}}</h3>
 
     <div v-if="showWinningHand" class="text-center">
       <v-dialog v-model="showWinningHand" width="800">
@@ -86,6 +82,12 @@ export default Vue.extend({
     };
   },
   computed: {
+    prevailingWind(): string {
+        return this.info ? this.playerOptions[this.info.game_state.prevailing_wind] :  "loading..."
+    },
+    remainingTileCount(): string {
+      return this.info ? this.info.game_state.remaining_tiles.length :  "loading...";
+    },
     playerWind(): string {
       if (!this.info) {
         return ".....loading"
@@ -209,6 +211,7 @@ export default Vue.extend({
   height: 100px;
   width: 700px;
   grid-area: oppositeplayer;
+  place-self: center;
 }
 .leftplayer {
   grid-area: leftplayer;
@@ -239,11 +242,15 @@ export default Vue.extend({
 
 .container {
   display: grid;
-  grid-template-columns: 300px 700px 300px;
+  grid-template-columns: 150px 700px 150px;
   grid-template-rows: 150px 700px 300px;
   grid-template-areas:
     ". oppositeplayer  ."
     "leftplayer main rightplayer"
     "player player player";
+}
+
+h3 {
+  margin: 40px 0 0;
 }
 </style>

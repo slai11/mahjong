@@ -1,5 +1,6 @@
 <template>
   <div class="lobby">
+    <h1>TableSwim Mahjong</h1>
     <h3>Step 1: Use the generated ID or paste your friend's table ID</h3>
     <h3>Step 2: Click "start game"</h3>
     <br>
