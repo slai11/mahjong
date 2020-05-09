@@ -73,14 +73,28 @@ func (gs *GameState) NextTurn(m Move) error {
 		ps.updateInnerGMap()
 
 	case Eat, EatLeft, EatRight:
-		ps.Eat(m.Tile, m.Action)
+		if err := ps.Eat(m.Tile, m.Action); err != nil {
+			return err
+		}
 
 	case Pong:
-		ps.Pong(m.Tile)
+		if err := ps.Pong(m.Tile); err != nil {
+			return err
+		}
 
 	case Gong:
-		gs.RemainingTiles = ps.Gong(m.Tile, gs.RemainingTiles)
-		gs.RemainingTiles = ps.repairHand(gs.RemainingTiles)
+		if err := ps.Gong(m.Tile); err != nil {
+			return err
+		}
+
+		// replenish after gong
+		remaining, err := ps.Draw(gs.RemainingTiles)
+		if err != nil {
+			return nil
+		}
+
+		gs.RemainingTiles = ps.repairHand(remaining)
+		ps.updateInnerGMap()
 
 	case InnerGong:
 		gs.RemainingTiles = ps.InnerGong(m.Tile, gs.RemainingTiles)

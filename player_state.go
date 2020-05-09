@@ -46,7 +46,7 @@ func NewPlayerState(size int, tiles []int) (*PlayerState, []int) {
 // Draw simply pops the first item of the remaining tiles into hand
 func (p *PlayerState) Draw(tiles []int) ([]int, error) {
 	if len(tiles) < 1 {
-		return nil, fmt.Errorf("insufficient tiles")
+		return nil, fmt.Errorf("[PlayerState.Draw]insufficient tiles")
 	}
 	drawn := tiles[0]
 	tiles = tiles[1:]
@@ -63,13 +63,13 @@ func (p *PlayerState) Discard(id int) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("tile not found")
+	return fmt.Errorf("[PlayerState.Discard]tile not found")
 }
 
 // can eat middle or eat side
-func (p *PlayerState) Eat(t int, side Action) {
+func (p *PlayerState) Eat(t int, side Action) error {
 	if !(p.CanEat || p.CanEatRight || p.CanEatLeft) {
-		return
+		return fmt.Errorf("[PlayerState.Eat] eating is not allowed")
 	}
 
 	tile := TileList[t]
@@ -88,60 +88,60 @@ func (p *PlayerState) Eat(t int, side Action) {
 
 	var eatenFirst, eatenSecond bool
 	triplet := []int{t}
-	i := 0
-	ate := false
+	newHand := make([]int, 0, len(p.Hand)-2)
 	for _, h := range p.Hand {
 		hTile := TileList[h]
 		if tile.Suit == hTile.Suit {
 			if !eatenFirst && first == hTile.Value {
 				triplet = append(triplet, h)
 				eatenFirst = true
-				ate = true
+				continue
 			} else if !eatenSecond && second == hTile.Value {
 				triplet = append(triplet, h)
 				eatenSecond = true
-				ate = true
+				continue
 			}
 		}
-		if !ate {
-			p.Hand[i] = h
-			i++
-		}
-		ate = false
+		newHand = append(newHand, h)
 	}
-	p.Hand = p.Hand[:i]
 
 	if len(triplet) != 3 {
-		panic("NO TRIPLET")
+		return fmt.Errorf("[PlayerState.Eat] triplet does not exist")
 	}
 
+	p.Hand = newHand
 	p.Displayed = append(p.Displayed, triplet)
+	return nil
 }
 
-func (p *PlayerState) Pong(tile int) {
+func (p *PlayerState) Pong(t int) error {
 	if !p.CanPong {
-		return
+		return fmt.Errorf("[PlayerState.Pong] pong is not allowed")
 	}
 
+	tile := TileList[t]
 	newHand := make([]int, 0, len(p.Hand)-2)
-	triplet := []int{tile}
+	triplet := []int{t}
 	for _, h := range p.Hand {
-		if TileList[tile].Suit == TileList[h].Suit && TileList[tile].Value == TileList[h].Value {
+		if tile.Suit == TileList[h].Suit && tile.Value == TileList[h].Value {
 			triplet = append(triplet, h)
 		} else {
 			newHand = append(newHand, h)
 		}
 	}
 
-	if len(triplet) == 3 {
-		p.Hand = newHand
-		p.Displayed = append(p.Displayed, triplet)
+	if len(triplet) != 3 {
+		return fmt.Errorf("[PlayerState.Pong] triplet does not exist")
 	}
+
+	p.Hand = newHand
+	p.Displayed = append(p.Displayed, triplet)
+	return nil
 }
 
-func (p *PlayerState) Gong(tile int, tiles []int) []int {
+func (p *PlayerState) Gong(tile int) error {
 	if !p.CanGong {
-		return tiles
+		return fmt.Errorf("[PlayerState.Gong] gong is not allowed")
 	}
 
 	newHand := make([]int, 0, len(p.Hand)-3)
@@ -154,11 +154,14 @@ func (p *PlayerState) Gong(tile int, tiles []int) []int {
 		}
 	}
 
+	if len(triplet) != 4 {
+		return fmt.Errorf("[PlayerState.Gong] triplet does not exist")
+	}
+
 	p.Hand = newHand
 	p.Displayed = append(p.Displayed, triplet)
 
-	tiles, _ = p.Draw(tiles) // always draw tile after a gong
-	return tiles
+	return nil
 }
 
 func (p *PlayerState) InnerGong(t int, tiles []int) []int {
@@ -197,7 +200,7 @@ func (p *PlayerState) ResetStatus() {
 	p.LastDrawnTile = -1
 }
 
-// this happens after drawing
+// UpdateStatus happens after a discard to set limits on possible actions
 func (p *PlayerState) UpdateStatus(t int) {
 	tile := TileList[t]
 	matching := 1
@@ -205,11 +208,13 @@ func (p *PlayerState) UpdateStatus(t int) {
 	for _, h := range p.Hand {
 		hTile := TileList[h]
 		if tile.Suit == hTile.Suit {
+			// pong/gong
 			if tile.Value == hTile.Value {
 				matching += 1
 				continue
 			}
 
+			// eat/eatleft/eatright
 			switch tile.Suit {
 			case Bamboo, Coin, Number:
 				if tile.Value == hTile.Value+1 {
@@ -303,7 +308,7 @@ func (p *PlayerState) updateInnerGMap() {
 		}
 	}
 
-	// if a Displayed triple exist
+	// displayed triplets can be upgraded to gong
 	for _, s := range p.Displayed {
 		if len(s) != 3 {
 			continue

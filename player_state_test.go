@@ -1,0 +1,381 @@
+package main
+
+import (
+	"testing"
+)
+
+func TestDraw(t *testing.T) {
+	type expected struct {
+		lastDrawn     int
+		handSize      int
+		remainingSize int
+	}
+	testcases := []struct {
+		name      string
+		hand      []int
+		remaining []int
+		expected  expected
+	}{
+		{
+			name:      "standard draw",
+			hand:      []int{1, 2, 3, 4},
+			remaining: []int{5, 6, 7, 8},
+			expected: expected{
+				handSize:      5,
+				remainingSize: 3,
+				lastDrawn:     5,
+			},
+		},
+		{
+			name:      "empty remaining",
+			hand:      []int{1, 2, 3, 4},
+			remaining: []int{},
+			expected: expected{
+				handSize:      4,
+				remainingSize: 0,
+				lastDrawn:     0,
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			ps := PlayerState{
+				Hand: tc.hand,
+			}
+
+			remaining, _ := ps.Draw(tc.remaining)
+			if len(ps.Hand) != tc.expected.handSize {
+				t.Errorf("hand: expected %v, got %v", tc.expected.handSize, len(ps.Hand))
+				return
+			}
+
+			if len(remaining) != tc.expected.remainingSize {
+				t.Errorf("remaining: expected %v, got %v", tc.expected.remainingSize, len(remaining))
+				return
+			}
+
+			if ps.LastDrawnTile != tc.expected.lastDrawn {
+				t.Errorf("lastDrawn: expected %v, got %v", tc.expected.lastDrawn, ps.LastDrawnTile)
+				return
+			}
+			return
+		})
+	}
+}
+
+func TestDiscard(t *testing.T) {
+	type expected struct {
+		handSize int
+		hasErr   bool
+	}
+	testcases := []struct {
+		name     string
+		hand     []int
+		discard  int
+		expected expected
+	}{
+		{
+			name:    "discard found",
+			hand:    []int{1, 2, 3, 4},
+			discard: 1,
+			expected: expected{
+				handSize: 3,
+				hasErr:   false,
+			},
+		},
+		{
+			name:    "discard only 1 tile",
+			hand:    []int{1, 2, 3, 4, 1},
+			discard: 1,
+			expected: expected{
+				handSize: 4,
+				hasErr:   false,
+			},
+		},
+		{
+			name:    "discard not found",
+			hand:    []int{1, 2, 3, 4},
+			discard: 5,
+			expected: expected{
+				handSize: 4,
+				hasErr:   true,
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			ps := PlayerState{
+				Hand: tc.hand,
+			}
+
+			err := ps.Discard(tc.discard)
+			if err != nil && !tc.expected.hasErr {
+				t.Errorf("expected %v, got %v", tc.expected.hasErr, err)
+				return
+			}
+			if len(ps.Hand) != tc.expected.handSize {
+				t.Errorf("hand: expected %v, got %v", tc.expected.handSize, len(ps.Hand))
+				return
+			}
+			return
+		})
+	}
+}
+
+func TestEat(t *testing.T) {
+	type expected struct {
+		displayed   []int
+		length      int
+		returnError bool
+	}
+	testcases := []struct {
+		name        string
+		hand        []int
+		canEat      bool
+		canEatLeft  bool
+		canEatRight bool
+		action      Action
+		tile        int
+		expected
+	}{
+		{
+			name:   "exits if boolean flag not set",
+			hand:   []int{1, 2, 3, 4},
+			action: Eat,
+			expected: expected{
+				displayed:   []int{},
+				length:      4,
+				returnError: true,
+			},
+		},
+		{
+			// eats 2 bamboo
+			name:   "eats correctly",
+			hand:   []int{0, 8},
+			tile:   5,
+			action: Eat,
+			canEat: true,
+			expected: expected{
+				displayed: []int{5, 0, 8},
+				length:    0,
+			},
+		},
+		{
+			// eats 2 bamboo on left of 3 + 4 bamboo
+			name:       "eats left correctly",
+			hand:       []int{0, 8, 12},
+			tile:       5,
+			action:     EatLeft,
+			canEatLeft: true,
+			expected: expected{
+				displayed: []int{5, 8, 12},
+				length:    1,
+			},
+		},
+		{
+			// eats 5 bamboo on left of 3 + 4 bamboo
+			name:        "eats right correctly",
+			hand:        []int{0, 8, 12},
+			tile:        17,
+			action:      EatRight,
+			canEatRight: true,
+			expected: expected{
+				displayed: []int{17, 8, 12},
+				length:    1,
+			},
+		},
+		{
+			// failing to eat should leave hand untouched
+			name:        "eats right correctly",
+			hand:        []int{0, 8, 20}, // 1, 3, 5 bamboo
+			tile:        17,              // 5 bamboo
+			action:      EatRight,
+			canEatRight: true,
+			expected: expected{
+				length:      3,
+				returnError: true,
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			ps := PlayerState{
+				Hand:        tc.hand,
+				CanEat:      tc.canEat,
+				CanEatLeft:  tc.canEatLeft,
+				CanEatRight: tc.canEatRight,
+				Displayed:   [][]int{},
+			}
+
+			err := ps.Eat(tc.tile, tc.action)
+			if tc.returnError {
+				if len(ps.Hand) != tc.expected.length || err == nil {
+					t.Errorf("handsize should not have changed")
+					return
+				}
+				return
+			}
+
+			if tc.expected.length != len(ps.Hand) {
+				t.Errorf("expected length %v but got %v", tc.expected.length, len(ps.Hand))
+				return
+			}
+
+			found := 0
+			for _, tile := range ps.Displayed[0] {
+				for _, dtile := range tc.expected.displayed {
+					if tile == dtile {
+						found++
+					}
+				}
+			}
+
+			if found != 3 {
+				t.Errorf("expected length 3 but got %v", found)
+				return
+			}
+
+		})
+	}
+}
+
+func TestPong(t *testing.T) {
+	type expected struct {
+		returnError bool
+	}
+
+	testcases := []struct {
+		name    string
+		tile    int
+		hand    []int
+		canPong bool
+		expected
+	}{
+
+		{
+			name:    "cannot pong",
+			tile:    0,
+			canPong: false,
+			expected: expected{
+				returnError: true,
+			},
+		},
+		{
+			name:    "pong",
+			tile:    0,
+			hand:    []int{1, 2},
+			canPong: true,
+			expected: expected{
+				returnError: false,
+			},
+		},
+		{
+			name:    "can pong but triplet missing",
+			tile:    0,
+			hand:    []int{1, 10},
+			canPong: true,
+			expected: expected{
+				returnError: true,
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			ps := PlayerState{
+				Hand:      tc.hand,
+				Displayed: [][]int{},
+				CanPong:   tc.canPong,
+			}
+
+			err := ps.Pong(tc.tile)
+			if tc.expected.returnError {
+				if err == nil {
+					t.Errorf("expected no error but got %v", err)
+					return
+				}
+				return
+			}
+
+			for _, dtile := range ps.Displayed[0] {
+				if TileList[dtile].Suit != TileList[tc.tile].Suit || TileList[dtile].Value != TileList[tc.tile].Value {
+					t.Errorf("ponged %v but got %v", tc.tile, dtile)
+					return
+				}
+			}
+		})
+	}
+}
+
+func TestGong(t *testing.T) {
+	type expected struct {
+		returnError bool
+	}
+
+	testcases := []struct {
+		name    string
+		tile    int
+		hand    []int
+		canGong bool
+		expected
+	}{
+
+		{
+			name:    "cannot gong",
+			tile:    0,
+			canGong: false,
+			expected: expected{
+				returnError: true,
+			},
+		},
+		{
+			name:    "gong",
+			tile:    0,
+			hand:    []int{1, 2, 3},
+			canGong: true,
+			expected: expected{
+				returnError: false,
+			},
+		},
+		{
+			name:    "can gong but triplet missing",
+			tile:    0,
+			hand:    []int{1, 10, 11},
+			canGong: true,
+			expected: expected{
+				returnError: true,
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			ps := PlayerState{
+				Hand:      tc.hand,
+				Displayed: [][]int{},
+				CanGong:   tc.canGong,
+			}
+
+			err := ps.Gong(tc.tile)
+			if tc.expected.returnError {
+				if err == nil {
+					t.Errorf("expected no error but got %v", err)
+					return
+				}
+				return
+			}
+
+			for _, dtile := range ps.Displayed[0] {
+				if TileList[dtile].Suit != TileList[tc.tile].Suit || TileList[dtile].Value != TileList[tc.tile].Value {
+					t.Errorf("ponged %v but got %v", tc.tile, dtile)
+					return
+				}
+			}
+		})
+	}
+}
