@@ -35,7 +35,7 @@ export default Vue.extend({
       gameid: this.gameID,
       playerNumber: -1,
       gameFull: false,
-      playerOptions: ["east", "south", "west", "north"]
+      playerOptions: [1, 2, 3, 4]
     };
   },
   watch: {

@@ -1,7 +1,7 @@
 <template>
   <div class="GameDashboard">
     
-    <h3>Table Number: {{gameID}} | You are {{ playerWind }}</h3>
+    <h3>Table Number: {{gameID}} | You are player {{this.playerNumber + 1}} ({{ playerWind }})</h3>
     <div v-if="info" class="game_status">
       <h3>Prevailing wind: {{playerOptions[info.game_state.prevailing_wind]}} |  | Remaining Tile: {{info.game_state.remaining_tiles.length}}</h3>
     </div>
