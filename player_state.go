@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type PlayerState struct {
 
 	// displayed tiles on board
@@ -8,6 +10,10 @@ type PlayerState struct {
 	// starts off with 13/14
 	// hand should only be visible to player
 	Hand []int `json:"hand"`
+
+	// most recent tile that entered hand from drawing
+	// or repairing
+	LastDrawnTile int `json:"last_drawn_tile"`
 
 	CanEat      bool `json:"can_eat"`
 	CanEatLeft  bool `json:"can_eat_left"`
@@ -23,29 +29,41 @@ func NewPlayerState(size int, tiles []int) (*PlayerState, []int) {
 	hand := tiles[0:size]
 	tiles = tiles[size:]
 
-	ps := PlayerState{Hand: hand, Displayed: [][]int{}, InnerGongMap: make(map[int]int)}
+	ps := PlayerState{
+		Hand:         hand,
+		Displayed:    [][]int{},
+		InnerGongMap: make(map[int]int),
+	}
+
 	tiles = ps.repairHand(tiles)
 	ps.updateInnerGMap()
+
+	// starting hand does not have a last drawn tile
+	ps.LastDrawnTile = -1
 	return &ps, tiles
 }
 
-// Draw is always folloed by repair since flower/animal must be opened
-func (p *PlayerState) Draw(tiles []int) []int {
+// Draw simply pops the first item of the remaining tiles into hand
+func (p *PlayerState) Draw(tiles []int) ([]int, error) {
+	if len(tiles) < 1 {
+		return nil, fmt.Errorf("insufficient tiles")
+	}
 	drawn := tiles[0]
 	tiles = tiles[1:]
 	p.Hand = append(p.Hand, drawn)
-
-	tiles = p.repairHand(tiles)
-	p.updateInnerGMap()
-	return tiles
+	p.LastDrawnTile = drawn
+	return tiles, nil
 }
 
-func (p *PlayerState) Discard(id int) {
+// Discard finds tile and deletes it from hand
+func (p *PlayerState) Discard(id int) error {
 	for i, t := range p.Hand {
 		if t == id {
 			p.Hand = append(p.Hand[:i], p.Hand[i+1:]...)
+			return nil
 		}
 	}
+	return fmt.Errorf("tile not found")
 }
 
 // can eat middle or eat side
@@ -70,7 +88,6 @@ func (p *PlayerState) Eat(t int, side Action) {
 
 	var eatenFirst, eatenSecond bool
 	triplet := []int{t}
-	// bug!
 	i := 0
 	ate := false
 	for _, h := range p.Hand {
@@ -140,7 +157,7 @@ func (p *PlayerState) Gong(tile int, tiles []int) []int {
 	p.Hand = newHand
 	p.Displayed = append(p.Displayed, triplet)
 
-	tiles = p.Draw(tiles) // always draw tile after a gong
+	tiles, _ = p.Draw(tiles) // always draw tile after a gong
 	return tiles
 }
 
@@ -166,7 +183,7 @@ func (p *PlayerState) InnerGong(t int, tiles []int) []int {
 	p.Hand = newHand
 	p.Displayed = append(p.Displayed, triplet)
 
-	tiles = p.Draw(tiles)
+	tiles, _ = p.Draw(tiles)
 	delete(p.InnerGongMap, k)
 	return tiles
 }
@@ -177,6 +194,7 @@ func (p *PlayerState) ResetStatus() {
 	p.CanEat = false
 	p.CanEatLeft = false
 	p.CanEatRight = false
+	p.LastDrawnTile = -1
 }
 
 // this happens after drawing
@@ -232,45 +250,40 @@ func (p *PlayerState) UpdateStatus(t int) {
 // if the drawn card is flower/aniimal, draw another
 // then move all flower/animal in Hand to Displayed stack
 func (p *PlayerState) repairHand(tiles []int) []int {
-	// lots of looping but realistically there are only 12 flower/animals
-
+	hand := make([]int, 0, 14) // max 14 anyway
 	for _, t := range p.Hand {
 		tile := TileList[t]
-		if tile.Suit == Flower || tile.Suit == Animal {
-			p.Displayed = append(p.Displayed, []int{t})
 
-			// draw 1 new tile
-			x := tiles[0]
+		if tile.Suit != Flower && tile.Suit != Animal {
+			hand = append(hand, t)
+			continue
+		}
+
+		p.Displayed = append(p.Displayed, []int{t})
+
+		// draw 1 new tile
+		x := tiles[0]
+		tiles = tiles[1:]
+		xt := TileList[x]
+
+		// keep replenishing until not flower or animal
+		// lots of looping but realistically there are only 12 flower/animals
+		for xt.Suit == Flower || xt.Suit == Animal {
+			p.Displayed = append(p.Displayed, []int{x})
+
+			// draw another
+			x = tiles[0]
 			tiles = tiles[1:]
-			xt := TileList[x]
-			// keep replenishing until not flower or animal
-			for xt.Suit == Flower || xt.Suit == Animal {
-				p.Displayed = append(p.Displayed, []int{x})
-
-				// draw another
-				x = tiles[0]
-				tiles = tiles[1:]
-				xt = TileList[x]
-			}
-
-			p.Hand = append(p.Hand, x)
+			xt = TileList[x]
 		}
+
+		// newly drawn non-flower/animal tile to hand
+		hand = append(hand, x)
+		p.LastDrawnTile = x
 	}
 
-	for _, t := range p.Displayed {
-		rmId := -1
-		for i := range p.Hand {
-			if p.Hand[i] == t[0] { //TODO hack here since flower/animals would be in lenght-1 slices
-				rmId = i
-				break
-			}
-		}
+	p.Hand = hand
 
-		if rmId != -1 {
-			// important to preserve order
-			p.Hand = append(p.Hand[:rmId], p.Hand[rmId+1:]...)
-		}
-	}
 	return tiles
 }
 
@@ -278,6 +291,7 @@ func (p *PlayerState) repairHand(tiles []int) []int {
 // Suit * 10 + Value = tile identifier
 func (p *PlayerState) updateInnerGMap() {
 	p.InnerGongMap = make(map[int]int)
+	// consolidate hand
 	for _, t := range p.Hand {
 		tile := TileList[t]
 		k := int(tile.Suit)*10 + tile.Value
@@ -291,18 +305,22 @@ func (p *PlayerState) updateInnerGMap() {
 
 	// if a Displayed triple exist
 	for _, s := range p.Displayed {
-		if len(s) == 3 {
-			s0 := TileList[s[0]]
-			s1 := TileList[s[1]]
-			s2 := TileList[s[2]]
-			if s0.Suit == s1.Suit && s0.Suit == s2.Suit && s0.Value == s1.Value && s0.Value == s2.Value {
-				k := int(s0.Suit)*10 + s0.Value
-				count, ok := p.InnerGongMap[k]
-				if !ok {
-					p.InnerGongMap[k] = 3
-				} else {
-					p.InnerGongMap[k] = count + 3
-				}
+		if len(s) != 3 {
+			continue
+		}
+
+		s0 := TileList[s[0]]
+		s1 := TileList[s[1]]
+		s2 := TileList[s[2]]
+
+		// all 3 displayed tile must be the same to qualify as potential gang
+		if s0.Suit == s1.Suit && s0.Suit == s2.Suit && s0.Value == s1.Value && s0.Value == s2.Value {
+			k := int(s0.Suit)*10 + s0.Value
+			count, ok := p.InnerGongMap[k]
+			if !ok {
+				p.InnerGongMap[k] = 3
+			} else {
+				p.InnerGongMap[k] = count + 3
 			}
 		}
 	}

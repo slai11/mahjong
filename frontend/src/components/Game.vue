@@ -9,7 +9,8 @@
     <div v-if="showWinningHand" class="text-center">
       <v-dialog v-model="showWinningHand" width="800">
         <v-card>
-          <Hand :msg="'Winner\'s hand'" :hand="this.info ? this.info.game_state.last_winning_hand : null" />
+          <h2>Winner: Player {{this.info.game_state.last_winning_hand.player + 1}}</h2>
+          <Hand :hand="this.info ? this.info.game_state.last_winning_hand.hand : null" :mark="winningTile"/>
         </v-card>
       </v-dialog>
     </div>
@@ -19,19 +20,19 @@
         class="rightplayer"
         :info="info.game_state.player_map[friendOrder[0]]"
         :playerNumber="friendOrder[0]"
-        :turnNumber="info.game_state.player_turn"
+        :playerTurn="info.game_state.player_turn"
       />
       <FriendInfo
         class="oppositeplayer"
         :info="info.game_state.player_map[friendOrder[1]]"
         :playerNumber="friendOrder[1]"
-        :turnNumber="info.game_state.player_turn"
+        :playerTurn="info.game_state.player_turn"
       />
       <FriendInfo
         class="leftplayer"
         :info="info.game_state.player_map[friendOrder[2]]"
         :playerNumber="friendOrder[2]"
-        :turnNumber="info.game_state.player_turn"
+        :playerTurn="info.game_state.player_turn"
       />
 
       <div class="discard">
@@ -39,7 +40,7 @@
           <Tile :id="tile" />
         </div>
         <Tile
-          v-if="info.game_state.last_discarded_tile"
+          v-if="info.game_state.last_discarded_tile !== null"
           :id="info.game_state.last_discarded_tile"
           :style="{outline: '2px double red'}"
         />
@@ -107,6 +108,11 @@ export default Vue.extend({
           return "south";
       }
       return "BUG. Pls screenshot and file an issue on github.com/slai11/mahjong"
+    },
+    winningTile(): number {
+      // if the player wins on turn 1, there is no last discarded nor last drawn.
+      // the player is a god of mahjong
+      return this.info ? this.info.game_state.last_winning_hand.winning_tile : -1
     },
     turnNumber(): number {
       return this.info ? this.info.game_state.turn_number : null;

@@ -1,7 +1,7 @@
 <template>
-  <div :class="(this.playerNumber === this.turnNumber)? 'active': 'friend'">
+  <div :class="(this.playerNumber === this.playerTurn)? 'active': 'friend'">
     <Displayed v-bind:displayed="this.info ? this.info.displayed : null" />
-    {{ "Player " +  this.playerNumber + " has " + this.info.hand.length + " tiles left"}}
+    {{ "Player " +  (this.playerNumber+1) + " has " + this.info.hand.length + " tiles left"}}
   </div>
 </template>
 
@@ -11,7 +11,7 @@ import Displayed from "./Displayed.vue";
 
 export default Vue.extend({
   name: "FriendInfo",
-  props: ["info", "playerNumber", "turnNumber"],
+  props: ["info", "playerNumber", "playerTurn"],
   components: { Displayed }
 });
 </script>

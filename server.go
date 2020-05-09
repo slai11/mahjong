@@ -82,12 +82,20 @@ func (s *Server) handleMove(rw http.ResponseWriter, req *http.Request) {
 	defer s.mu.RUnlock()
 	gh, ok := s.games[request.GameID]
 	if !ok {
+		log.WithFields(log.Fields{
+			"method": "handleMove",
+		}).Error("Game does not exist: ", request.GameID)
+
 		http.Error(rw, "No such game", 404)
 		return
 	}
 
 	err := gh.Update(request.Move)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"method": "handleMove",
+		}).Error("Error with update: ", err)
+
 		http.Error(rw, err.Error(), 400)
 		return
 	}

@@ -25,9 +25,16 @@ func initSet() []int {
 	for i := 0; i < n; i++ {
 		mj[i] = i
 	}
+
 	rand.Seed(time.Now().Unix())
 	rand.Shuffle(len(mj), func(i, j int) { mj[i], mj[j] = mj[j], mj[i] })
 	rand.Shuffle(len(mj), func(i, j int) { mj[i], mj[j] = mj[j], mj[i] })
+	rand.Shuffle(len(mj), func(i, j int) { mj[i], mj[j] = mj[j], mj[i] })
+	rand.Shuffle(len(mj), func(i, j int) { mj[i], mj[j] = mj[j], mj[i] })
+
+	if len(mj) != 148 {
+		panic("invalid starting set")
+	}
 	return mj
 }
 

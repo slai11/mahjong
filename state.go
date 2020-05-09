@@ -10,6 +10,12 @@ type Move struct {
 	TurnNumber int `json:"turn_number"`
 }
 
+type LastWinningHand struct {
+	Player      `json:"player"`
+	WinningTile int   `json:"winning_tile"`
+	Hand        []int `json:"hand"`
+}
+
 // GameState represents the mahjong table
 type GameState struct {
 	// anchor player, prevailingWind changes when PlayerTurn == starter
@@ -30,8 +36,8 @@ type GameState struct {
 	DiscardedTiles    []int                   `json:"discarded_tiles"`
 	RemainingTiles    []int                   `json:"remaining_tiles"`
 	LastDiscardedTile *int                    `json:"last_discarded_tile"`
-	LastWinningHand   []int                   `json:"last_winning_hand"`
-	LastWinningTurn   int                     `json:"last_winning_turn"`
+	LastWinningHand   `json:"last_winning_hand"`
+	LastWinningTurn   int `json:"last_winning_turn"`
 }
 
 func NewGameState() GameState {
@@ -55,7 +61,12 @@ func (gs *GameState) NextTurn(m Move) error {
 	ps, _ := gs.PlayerMap[m.Player]
 	switch m.Action {
 	case Draw:
-		gs.RemainingTiles = ps.Draw(gs.RemainingTiles)
+		remaining, err := ps.Draw(gs.RemainingTiles)
+		if err != nil {
+			return nil
+		}
+		gs.RemainingTiles = ps.repairHand(remaining)
+		ps.updateInnerGMap()
 
 	case Eat, EatLeft, EatRight:
 		ps.Eat(m.Tile, m.Action)
@@ -74,7 +85,11 @@ func (gs *GameState) NextTurn(m Move) error {
 		if gs.PlayerTurn != m.Player {
 			return fmt.Errorf("not your turn to discard")
 		}
-		ps.Discard(m.Tile)
+
+		if err := ps.Discard(m.Tile); err != nil {
+			return err
+		}
+
 		// trigger update of all players
 		for k, v := range gs.PlayerMap {
 			v.ResetStatus()
@@ -94,10 +109,7 @@ func (gs *GameState) NextTurn(m Move) error {
 		}
 
 		// record winner
-		gs.LastWinningHand = ps.Hand
-		for _, d := range ps.Displayed {
-			gs.LastWinningHand = append(gs.LastWinningHand, d...)
-		}
+		gs.recordWinner(ps, m)
 
 		// display winning hand only for next turn
 		gs.LastWinningTurn = gs.TurnNumber + 1
@@ -108,7 +120,31 @@ func (gs *GameState) NextTurn(m Move) error {
 
 	gs.stateTransit(m.Action, m.Player, &m.Tile)
 
+	if err := gs.validateTurn(); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (gs *GameState) recordWinner(ps *PlayerState, m Move) {
+	// record winner
+	whand := LastWinningHand{Hand: ps.Hand, Player: m.Player}
+	// winning tile is either last discarded or last drawn
+	if gs.LastDiscardedTile == nil {
+		whand.WinningTile = ps.LastDrawnTile
+	} else {
+		whand.WinningTile = *gs.LastDiscardedTile
+		// consolidate winners hand
+		if whand.WinningTile != -1 {
+			whand.Hand = append(whand.Hand, whand.WinningTile)
+		}
+	}
+
+	for _, d := range ps.Displayed {
+		whand.Hand = append(whand.Hand, d...)
+	}
+	gs.LastWinningHand = whand
 }
 
 // resets board to with `start` being the dealer
@@ -134,13 +170,11 @@ func (gs *GameState) resetBoard(dealer Player) {
 	gs.PlayerMap = pMap
 	gs.RemainingTiles = tiles
 	gs.LastDiscardedTile = nil
-
 }
 
 // Reflects state of the game
 // IsTransitioning: a discard just happened
 // * only valid moves to players are draw/eat/pong/gong/call
-//
 // !IsTransitioning: a player just took a tile either by:
 // draw/eat/ping/gong.
 // * valid next moves are discard/inner_gong/call
@@ -170,4 +204,53 @@ func (gs *GameState) stateTransit(action Action, player Player, tile *int) {
 
 	// ensures turn order correctness
 	gs.TurnNumber += 1
+}
+
+// potentially expensive but only run after a move is performed
+// ensures no duplicate tiles and no shortage/surplus
+func (gs *GameState) validateTurn() error {
+	checkMap := make(map[int]bool)
+	for _, t := range gs.RemainingTiles {
+		if _, ok := checkMap[t]; ok {
+			return fmt.Errorf("game state invalid: duplicate @ remaining tiles")
+		}
+		checkMap[t] = true
+	}
+
+	for _, t := range gs.DiscardedTiles {
+		if _, ok := checkMap[t]; ok {
+			return fmt.Errorf("game state invalid: duplicate @ discarded tile")
+		}
+		checkMap[t] = true
+	}
+
+	for _, v := range gs.PlayerMap {
+		for _, t := range v.Hand {
+			if _, ok := checkMap[t]; ok {
+				return fmt.Errorf("game state invalid")
+			}
+			checkMap[t] = true
+		}
+		for _, s := range v.Displayed {
+			for _, t := range s {
+				if _, ok := checkMap[t]; ok {
+					return fmt.Errorf("game state invalid")
+				}
+				checkMap[t] = true
+			}
+		}
+	}
+
+	if gs.LastDiscardedTile != nil {
+		if _, ok := checkMap[*gs.LastDiscardedTile]; ok {
+			return fmt.Errorf("game state invalid: duplicate @ last discarded tile")
+		}
+		checkMap[*gs.LastDiscardedTile] = true
+	}
+
+	if len(checkMap) != 148 {
+		return fmt.Errorf("game state invalid: insufficent tiles")
+	}
+
+	return nil
 }

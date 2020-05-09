@@ -1,7 +1,7 @@
 <template>
   <div class="hand">
     <Displayed v-bind:displayed="this.info ? this.info.displayed : null" />
-    <Hand :hand="this.info ? this.info.hand : null" @move="emitMove" />
+    <Hand :hand="this.info ? this.info.hand : null" @move="emitMove" :mark="lastDrawnTile"/>
 
 
     <div v-if="this.transiting">
@@ -56,6 +56,9 @@ export default Vue.extend({
     };
   },
   computed: {
+    lastDrawnTile(): number {
+      return this.info.last_drawn_tile ? this.info.last_drawn_tile : -1
+    },
     possibleGone(): number[][] {
       return this.info.inner_gong_map.filter((l: number[]) => {
         l.length === 4;
