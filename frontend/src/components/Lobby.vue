@@ -4,8 +4,15 @@
     <h3>Step 1: Use the generated ID or paste your friend's table ID</h3>
     <h3>Step 2: Click "start game"</h3>
     <br>
-    <input v-model="gameid" placeholder="Enter game ID" />
-    <v-btn v-on:click="enterGame">Start Game</v-btn>
+
+    <v-row justify="center" align="center">
+      <v-spacer></v-spacer>
+      <v-col cols="6" md="4">
+        <v-text-field outlined v-model="gameid" label="Game ID" />
+        <v-btn :click="enterGame">Start Game</v-btn>
+      </v-col>
+      <v-spacer></v-spacer>
+    </v-row>
 
     <div v-if="gameFull">
       <h3>Game is full. Did you disconnect? Select player to rejoin as:</h3>
@@ -13,6 +20,15 @@
         <input type="radio" id="idx" :value="idx" v-model="playerNumber" />
         <label for="idx">{{ player }}</label>
       </div>
+    </div>
+    <div>
+      <h3>Points to note:</h3>
+      <ul>
+         <li>1. "Move not allowed" occurs when more than 1 player selects an action in the same turn (draw and pong). First come first served.</li>
+         <li>2. Number beside tiles are for debugging purpose, will be removed upon stable release of the web app.</li>
+         <li>3. Report bugs and feature requests here: https://forms.gle/NzR2oSbg6Kj548jB9</li>
+         <li>4. More technical users can submit an issue here: https://github.com/slai11/mahjong</li>
+      </ul>
     </div>
   </div>
 </template>

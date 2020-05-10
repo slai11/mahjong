@@ -13,7 +13,7 @@
       <v-btn v-if="this.player_turn === this.player_number &&  this.info.can_eat_right" @click="emitInterruptMove(3)" >Eat Right</v-btn>
       <v-btn v-if="this.player_turn === this.player_number &&  this.info.can_eat_left" @click="emitInterruptMove(4)" >Eat Left</v-btn>
     </div>
-    <v-btn v-if="this.transiting || this.player_turn === this.player_number"  @click="dialog = true">Call</v-btn>
+    <v-btn v-if="this.transiting || this.player_turn === this.player_number"  @click="dialog = true">Hu</v-btn>
 
     <v-row justify="center">
       <v-dialog v-model="dialog" persistent max-width="400">
