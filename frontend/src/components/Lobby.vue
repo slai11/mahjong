@@ -37,6 +37,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { GameStateResponse } from "../models/game_state";
+import uniqueIdGenerator from "../util/uniqueIdGenerator";
 
 interface PlayerRegistrationResp {
   assigned_number: number;
@@ -45,11 +46,11 @@ interface PlayerRegistrationResp {
 export default Vue.extend({
   name: "Lobby",
   props: {
-    gameID: String
+    routed: String,
   },
   data() {
     return {
-      gameid: this.gameID,
+      gameid: uniqueIdGenerator(),
       playerNumber: -1,
       gameFull: false,
       playerOptions: [1, 2, 3, 4]
@@ -58,6 +59,12 @@ export default Vue.extend({
   watch: {
     playerNumber: function(val) {
       this.$emit("registered", val);
+    }
+  },
+  mounted() {
+    if (this.routed) {
+      this.gameid = this.routed;
+      this.enterGame();
     }
   },
   methods: {
