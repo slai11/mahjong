@@ -467,3 +467,128 @@ func TestRepair(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateStatus(t *testing.T) {
+	type expected struct {
+		canPong     bool
+		canEat      bool
+		canEatLeft  bool
+		canEatRight bool
+		canGong     bool
+	}
+	testcases := []struct {
+		name string
+		hand []int
+		tile int
+		expected
+	}{
+		{
+			// 1 bamboo cant be eaten
+			name:     "nothing to update",
+			hand:     []int{1, 10},
+			tile:     1,
+			expected: expected{},
+		},
+		{
+			name: "can eat middle",
+			hand: []int{1, 10},
+			tile: 5,
+			expected: expected{
+				canEat: true,
+			},
+		},
+		{
+			name: "can eat left",
+			hand: []int{10, 15},
+			tile: 5,
+			expected: expected{
+				canEatLeft: true,
+			},
+		},
+		{
+			name: "can eat right",
+			hand: []int{10, 15},
+			tile: 19,
+			expected: expected{
+				canEatRight: true,
+			},
+		},
+		{
+			name: "can pong",
+			hand: []int{10, 11},
+			tile: 9,
+			expected: expected{
+				canPong: true,
+			},
+		},
+		{
+			name: "can gong",
+			hand: []int{8, 10, 11},
+			tile: 9,
+			expected: expected{
+				canGong: true,
+				canPong: true,
+			},
+		},
+		{
+			name: "can eat left and middle",
+			hand: []int{1, 8, 12},
+			tile: 4,
+			expected: expected{
+				canEat:     true,
+				canEatLeft: true,
+			},
+		},
+		{
+			name: "can eat right and middle",
+			hand: []int{4, 8, 16},
+			tile: 12,
+			expected: expected{
+				canEat:      true,
+				canEatRight: true,
+			},
+		},
+		{
+			name: "can eat left, right and middle, pong and gong",
+			hand: []int{4, 8, 16, 13, 14, 15, 20},
+			tile: 12,
+			expected: expected{
+				canEat:      true,
+				canEatRight: true,
+				canEatLeft:  true,
+				canPong:     true,
+				canGong:     true,
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			ps := PlayerState{
+				Hand: tc.hand,
+			}
+			ps.UpdateStatus(tc.tile)
+
+			if tc.expected.canEat != ps.CanEat {
+				t.Errorf("expected canEat to be %v but got %v", tc.expected.canEat, ps.CanEat)
+				return
+			}
+			if tc.expected.canEatLeft != ps.CanEatLeft {
+				t.Errorf("expected canEatLeft to be %v but got %v", tc.expected.canEatLeft, ps.CanEatLeft)
+				return
+			}
+			if tc.expected.canEatRight != ps.CanEatRight {
+				t.Errorf("expected canEatRight to be %v but got %v", tc.expected.canEatRight, ps.CanEatRight)
+				return
+			}
+			if tc.expected.canPong != ps.CanPong {
+				t.Errorf("expected canPong to be %v but got %v", tc.expected.canPong, ps.CanPong)
+				return
+			}
+			if tc.expected.canGong != ps.CanGong {
+				t.Errorf("expected canGong to be %v but got %v", tc.expected.canGong, ps.CanGong)
+				return
+			}
+		})
+	}
+}

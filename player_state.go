@@ -230,11 +230,11 @@ func (p *PlayerState) UpdateStatus(t int) {
 		}
 	}
 
-	if matching == 3 {
+	switch matching {
+	case 3:
 		p.CanPong = true
-	}
-
-	if matching == 4 {
+	case 4:
+		p.CanPong = true
 		p.CanGong = true
 	}
 
