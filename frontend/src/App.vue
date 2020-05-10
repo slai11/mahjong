@@ -1,31 +1,18 @@
 <template>
   <div data-app id="app">
-    <Lobby v-if="playerNumber === -1"
-      :gameID="gameID" 
-      @change="gameID = $event"
-      @registered="playerNumber = $event"/>
-    <Game v-else :gameID=gameID :playerNumber=playerNumber msg="Table"/>
+   <nav>
+     <router-link to="/"/>
+     <router-link to="/:gameid"/>
+   </nav>
+   <router-view/>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import Lobby from './components/Lobby.vue';
-import Game from './components/Game.vue';
-import uniqueIdGenerator from "./util/uniqueIdGenerator";
 
 export default Vue.extend({
   name: 'App',
-  components: {
-    Lobby,
-    Game,
-  },
-  data() {
-    return {
-      playerNumber: -1,
-      gameID: uniqueIdGenerator(),
-    }
-  }
 });
 </script>
 

@@ -1,5 +1,6 @@
 <template>
   <div class="GameDashboard">
+    <h5>Share this link with your friends: https://tableswim.netlify.app/{{gameID}}</h5>
     <h3>Table Number: {{gameID}} | You are player {{this.playerNumber + 1}} ({{ playerWind }}) | Prevailing wind: {{prevailingWind}} |  | Remaining Tile: {{remainingTileCount}}</h3>
 
     <div v-if="showWinningHand" class="text-center">
