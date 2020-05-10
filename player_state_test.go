@@ -379,3 +379,91 @@ func TestGong(t *testing.T) {
 		})
 	}
 }
+
+func TestRepair(t *testing.T) {
+	type expected struct {
+		tileCount      int
+		displayedCount int
+	}
+	testcases := []struct {
+		name  string
+		tiles []int
+		hand  []int
+		expected
+	}{
+		{
+			name:  "nothing to repair",
+			hand:  []int{1, 2, 3, 4, 5},
+			tiles: []int{6, 7, 8, 9, 10},
+			expected: expected{
+				tileCount:      5,
+				displayedCount: 0,
+			},
+		},
+		{
+			name:  "1 animal",
+			hand:  []int{1, 2, 3, 4, 136},
+			tiles: []int{6, 141, 8, 9, 10},
+			expected: expected{
+				tileCount:      4,
+				displayedCount: 1,
+			},
+		},
+		{
+			name:  "1 flower",
+			hand:  []int{1, 2, 3, 4, 140},
+			tiles: []int{6, 141, 8, 9, 10},
+			expected: expected{
+				tileCount:      4,
+				displayedCount: 1,
+			},
+		},
+		{
+			name:  "1 flower in hand, 1 flower repaired",
+			hand:  []int{1, 2, 3, 4, 140},
+			tiles: []int{141, 7, 8, 9, 10},
+			expected: expected{
+				tileCount:      3,
+				displayedCount: 2,
+			},
+		},
+		{
+			name:  "2 animal/flower in hand, 1 flower repaired",
+			hand:  []int{1, 2, 3, 136, 140},
+			tiles: []int{141, 7, 8, 9, 10},
+			expected: expected{
+				tileCount:      2,
+				displayedCount: 3,
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			ps := PlayerState{
+				Hand:      tc.hand,
+				Displayed: [][]int{},
+			}
+
+			remaining := ps.RepairHand(tc.tiles)
+
+			if len(remaining) != tc.expected.tileCount {
+				t.Errorf("remaining: expected %v but got %v", tc.expected.tileCount, len(remaining))
+				return
+
+			}
+
+			if len(tc.hand) != len(ps.Hand) {
+				t.Errorf("hand: expected %v but got %v", len(tc.hand), len(ps.Hand))
+				return
+
+			}
+
+			if len(ps.Displayed) != tc.expected.displayedCount {
+				t.Errorf("displayed: expected %v but got %v", tc.expected.displayedCount, len(ps.Displayed))
+				return
+			}
+
+		})
+	}
+}

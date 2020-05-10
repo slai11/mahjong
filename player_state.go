@@ -35,7 +35,7 @@ func NewPlayerState(size int, tiles []int) (*PlayerState, []int) {
 		InnerGongMap: make(map[int]int),
 	}
 
-	tiles = ps.repairHand(tiles)
+	tiles = ps.RepairHand(tiles)
 	ps.updateInnerGMap()
 
 	// starting hand does not have a last drawn tile
@@ -254,7 +254,7 @@ func (p *PlayerState) UpdateStatus(t int) {
 // for every flower/animal card in Hand, draw 1 card
 // if the drawn card is flower/aniimal, draw another
 // then move all flower/animal in Hand to Displayed stack
-func (p *PlayerState) repairHand(tiles []int) []int {
+func (p *PlayerState) RepairHand(tiles []int) []int {
 	hand := make([]int, 0, 14) // max 14 anyway
 	for _, t := range p.Hand {
 		tile := TileList[t]

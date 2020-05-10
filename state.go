@@ -69,7 +69,7 @@ func (gs *GameState) NextTurn(m Move) error {
 		if err != nil {
 			return nil
 		}
-		gs.RemainingTiles = ps.repairHand(remaining)
+		gs.RemainingTiles = ps.RepairHand(remaining)
 		ps.updateInnerGMap()
 
 	case Eat, EatLeft, EatRight:
@@ -93,12 +93,12 @@ func (gs *GameState) NextTurn(m Move) error {
 			return nil
 		}
 
-		gs.RemainingTiles = ps.repairHand(remaining)
+		gs.RemainingTiles = ps.RepairHand(remaining)
 		ps.updateInnerGMap()
 
 	case InnerGong:
 		gs.RemainingTiles = ps.InnerGong(m.Tile, gs.RemainingTiles)
-		gs.RemainingTiles = ps.repairHand(gs.RemainingTiles)
+		gs.RemainingTiles = ps.RepairHand(gs.RemainingTiles)
 
 	case Discard:
 		// only player's turn can call discard
