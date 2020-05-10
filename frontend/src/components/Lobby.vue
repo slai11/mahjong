@@ -9,7 +9,7 @@
       <v-spacer></v-spacer>
       <v-col cols="6" md="4">
         <v-text-field outlined v-model="gameid" label="Game ID" />
-        <v-btn :click="enterGame">Start Game</v-btn>
+        <v-btn @click="enterGame">Start Game</v-btn>
       </v-col>
       <v-spacer></v-spacer>
     </v-row>
