@@ -14,6 +14,7 @@ type LastWinningHand struct {
 	Player      `json:"player"`
 	WinningTile int   `json:"winning_tile"`
 	Hand        []int `json:"hand"`
+	Stalemate   bool  `json:"stalemate"`
 }
 
 // GameState represents the mahjong table
@@ -62,6 +63,12 @@ func (gs *GameState) NextTurn(m Move) error {
 		return fmt.Errorf("turn over")
 	}
 
+	// set action to Stalemate instantly if insufficent remaining tiles
+	// this is triggered when player who drew last tile cannot win
+	if len(gs.RemainingTiles) < 16 && m.Action != Call {
+		m.Action = Stalemate
+	}
+
 	ps, _ := gs.PlayerMap[m.Player]
 	switch m.Action {
 	case Draw:
@@ -71,6 +78,12 @@ func (gs *GameState) NextTurn(m Move) error {
 		}
 		gs.RemainingTiles = ps.RepairHand(remaining)
 		ps.updateInnerGMap()
+
+		// if player draws last tile, he/she can still win
+		// but if player requires to repair, its a stalemate
+		if len(gs.RemainingTiles) < 15 {
+			m.Action = Stalemate
+		}
 
 	case Eat, EatLeft, EatRight:
 		if err := ps.Eat(m.Tile, m.Action); err != nil {
@@ -95,6 +108,10 @@ func (gs *GameState) NextTurn(m Move) error {
 
 		gs.RemainingTiles = ps.RepairHand(remaining)
 		ps.updateInnerGMap()
+
+		if len(gs.RemainingTiles) < 15 {
+			m.Action = Stalemate
+		}
 
 	case InnerGong:
 		gs.RemainingTiles = ps.InnerGong(m.Tile, gs.RemainingTiles)
@@ -135,6 +152,12 @@ func (gs *GameState) NextTurn(m Move) error {
 		gs.LastWinningTurn = gs.TurnNumber + 1
 
 		// reset everything
+		gs.resetBoard(gs.Starter)
+	}
+
+	if m.Action == Stalemate {
+		gs.LastWinningTurn = gs.TurnNumber + 1
+		gs.LastWinningHand = LastWinningHand{Stalemate: true}
 		gs.resetBoard(gs.Starter)
 	}
 

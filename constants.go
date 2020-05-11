@@ -18,6 +18,7 @@ const (
 	Gong
 	InnerGong
 	Call
+	Stalemate
 )
 
 // 4 possible players with a util function for next to loop them
