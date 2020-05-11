@@ -109,6 +109,10 @@ func (gs *GameState) NextTurn(m Move) error {
 		gs.RemainingTiles = ps.RepairHand(remaining)
 		ps.updateInnerGMap()
 
+		if len(gs.RemainingTiles) < 15 {
+			m.Action = Stalemate
+		}
+
 	case InnerGong:
 		gs.RemainingTiles = ps.InnerGong(m.Tile, gs.RemainingTiles)
 		gs.RemainingTiles = ps.RepairHand(gs.RemainingTiles)
