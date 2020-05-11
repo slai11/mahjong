@@ -4,7 +4,12 @@
     <h3>Table Number: {{gameID}} | You are player {{this.playerNumber + 1}} ({{ playerWind }}) | Prevailing wind: {{prevailingWind}} |  | Remaining Tile: {{remainingTileCount}}</h3>
 
     <div v-if="showWinningHand" class="text-center">
-      <v-dialog v-model="showWinningHand" width="800">
+      <v-dialog v-if="this.info.game_state.last_winning_hand.stalemate === true" v-model="showWinningHand" width="800">
+        <v-card>
+          <h2>No one won the round!</h2>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-else v-model="showWinningHand" width="800">
         <v-card>
           <h2>Winner: Player {{this.info.game_state.last_winning_hand.player + 1}}</h2>
           <Hand :hand="this.info ? this.info.game_state.last_winning_hand.hand : null" :mark="winningTile"/>
