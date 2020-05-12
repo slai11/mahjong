@@ -123,7 +123,7 @@ func (p *PlayerState) Pong(t int) error {
 	newHand := make([]int, 0, len(p.Hand)-2)
 	triplet := []int{t}
 	for _, h := range p.Hand {
-		if tile.Suit == TileList[h].Suit && tile.Value == TileList[h].Value {
+		if tile.Suit == TileList[h].Suit && tile.Value == TileList[h].Value && len(triplet) < 3 {
 			triplet = append(triplet, h)
 		} else {
 			newHand = append(newHand, h)
