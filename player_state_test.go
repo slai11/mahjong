@@ -281,6 +281,15 @@ func TestPong(t *testing.T) {
 				returnError: true,
 			},
 		},
+		{
+			name:    "can pong and gong",
+			tile:    0,
+			hand:    []int{1, 2, 3},
+			canPong: true,
+			expected: expected{
+				returnError: false,
+			},
+		},
 	}
 
 	for _, tc := range testcases {
