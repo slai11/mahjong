@@ -3,7 +3,7 @@
 
 A minimalist online multiplayer mahjong game for friends. Best played with video/voice conferencing and a dash of socialising.
 
-A hosted version of this app is available on [www.tableswim.netlify.app](https://tableswim.netlify.app/).
+A hosted version of this app is available on [www.tableswim.com](https://tableswim.com).
 
 ## Deployment
 Frontend is deployed on Netlify under free tier. Backend is deployed via

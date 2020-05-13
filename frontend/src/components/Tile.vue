@@ -1,7 +1,7 @@
 <template>
-<div >
-  <img class="tile" :src="`/tiles/${tileName}.jpg`">
-  {{id}}
+  <div>
+    <img class="tile" :src="`/tiles/${tileName}.jpg`">
+    {{id}}
   </div>
     
 </template>
