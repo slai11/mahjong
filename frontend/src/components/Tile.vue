@@ -1,9 +1,13 @@
 <template>
-  <div>
+<div>
+<div v-if="debug">
     <img class="tile" :src="`/tiles/${tileName}.jpg`">
-    {{id}}
+    {{ id }}
   </div>
-    
+  <div v-else>
+    <img class="tile" :src="`/tiles/${tileName}.jpg`">
+  </div>
+</div>
 </template>
 
 <script lang="ts">
@@ -16,6 +20,9 @@ export default Vue.extend({
     id: Number
   },
   computed: {
+    debug(): boolean {
+      return process.env.VUE_APP_DEBUG_TILE === "true";
+    },
     tileName(): string {
       return TileList[this.id].id;
     }
