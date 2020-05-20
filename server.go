@@ -90,6 +90,10 @@ func (s *Server) handleMove(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	log.WithFields(log.Fields{
+		"method": "handleMove",
+	}).Info("New move for game ", request.GameID)
+
 	err := gh.Update(request.Move)
 	if err != nil {
 		log.WithFields(log.Fields{
