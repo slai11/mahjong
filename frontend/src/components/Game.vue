@@ -145,7 +145,7 @@ export default Vue.extend({
     fn();
     setInterval(function() {
       fn();
-    }, 5000);
+    }, 2000);
   },
   methods: {
     getGameState() {
