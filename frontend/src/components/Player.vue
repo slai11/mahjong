@@ -12,7 +12,14 @@
       <v-btn v-if="this.player_turn === this.player_number && this.info.can_eat" @click="emitInterruptMove(2)" >Eat</v-btn>
       <v-btn v-if="this.player_turn === this.player_number &&  this.info.can_eat_right" @click="emitInterruptMove(3)" >Eat Right</v-btn>
       <v-btn v-if="this.player_turn === this.player_number &&  this.info.can_eat_left" @click="emitInterruptMove(4)" >Eat Left</v-btn>
+
+      <div v-for="(value, name) in this.info.inner_gong_map" :key="name">
+        <li v-if="value === 4 && this.player_turn === this.player_number">
+          <v-btn @click="emitInnerGong(7, innerGongTile(name).id)">Gong {{innerGongTile(name).name}}</v-btn>
+        </li>
+      </div>
     </div>
+
     <v-btn v-if="this.transiting || this.player_turn === this.player_number"  @click="dialog = true">Hu</v-btn>
 
     <v-row justify="center">
@@ -29,11 +36,7 @@
       </v-dialog>
     </v-row>
 
-    <div v-for="(value, name) in this.info.inner_gong_map" :key="name">
-      <li v-if="value === 4">
-        <v-btn @click="emitInnerGong(7, innerGongTile(name).id)">Gong {{innerGongTile(name).name}}</v-btn>
-      </li>
-    </div>
+    
   </div>
 </template>
 
