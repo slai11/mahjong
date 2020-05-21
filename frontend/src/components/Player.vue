@@ -29,11 +29,14 @@
       </v-dialog>
     </v-row>
 
-    <div v-for="(value, name) in this.info.inner_gong_map" :key="name">
-      <li v-if="value === 4">
-        <v-btn @click="emitInnerGong(7, innerGongTile(name).id)">Gong {{innerGongTile(name).name}}</v-btn>
-      </li>
+    <div v-if="this.player_turn === this.player_number">
+      <div v-for="(value, name) in this.info.inner_gong_map" :key="name">
+        <li v-if="value === 4">
+          <v-btn @click="emitInnerGong(7, innerGongTile(name).id)">Gong {{innerGongTile(name).name}}</v-btn>
+        </li>
+      </div>
     </div>
+
   </div>
 </template>
 
