@@ -25,9 +25,15 @@
       <h3>Points to note:</h3>
       <ul>
          <li>1. "Move not allowed" occurs when more than 1 player selects an action in the same turn (draw and pong). First come first served.</li>
-         <li>2. Number beside tiles are for debugging purpose, will be removed upon stable release of the web app.</li>
-         <li>3. Report bugs and feature requests here: https://forms.gle/NzR2oSbg6Kj548jB9</li>
-         <li>4. More technical users can submit an issue here: https://github.com/slai11/mahjong</li>
+         <li>2. Report bugs and feature requests here: https://forms.gle/NzR2oSbg6Kj548jB9</li>
+         <li>3. More technical users can submit an issue here: https://github.com/slai11/mahjong</li>
+      </ul>
+    </div>
+    <br>
+    <div>
+      <h2>New Changes</h2>
+      <ul>
+         <li>(Added 2020-05-24): 3 second disable on "Draw" button to allow other players to pong/gong/hu.</li>
       </ul>
     </div>
   </div>
