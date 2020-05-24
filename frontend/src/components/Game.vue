@@ -54,6 +54,7 @@
         :player_turn="info.game_state.player_turn"
         :player_number="playerNumber"
         :transiting="info.game_state.is_transitioning"
+        :turnNumber="turnNumber"
         @move="postMove($event)"
         @imove="postInterruptMove($event)"
       />

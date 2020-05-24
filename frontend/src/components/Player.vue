@@ -9,9 +9,32 @@
       <v-btn v-if="this.info.can_pong" @click="emitInterruptMove(5)" >Pong</v-btn>
       <v-btn v-if="this.info.can_gong" @click="emitInterruptMove(6)" >Gong</v-btn>
 
-      <v-btn v-if="this.player_turn === this.player_number && this.info.can_eat" @click="emitInterruptMove(2)" >Eat</v-btn>
-      <v-btn v-if="this.player_turn === this.player_number &&  this.info.can_eat_right" @click="emitInterruptMove(3)" >Eat Right</v-btn>
-      <v-btn v-if="this.player_turn === this.player_number &&  this.info.can_eat_left" @click="emitInterruptMove(4)" >Eat Left</v-btn>
+      <div v-if="this.player_turn === this.player_number &&  this.info.can_eat" >
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" @click="emitInterruptMove(2)" >Eat</v-btn>
+          </template>
+          <span>Example: 5, _, 7, eating a 6 would be "eat"</span>
+        </v-tooltip>
+      </div>
+
+      <div v-if="this.player_turn === this.player_number &&  this.info.can_eat_right" >
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" @click="emitInterruptMove(3)" >Eat Right</v-btn>
+          </template>
+          <span>Example: 5, 6, _, eating a 7 would be "eat right"</span>
+        </v-tooltip>
+      </div>
+
+      <div v-if="this.player_turn === this.player_number &&  this.info.can_eat_left" >
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" @click="emitInterruptMove(4)" >Eat Left</v-btn>
+          </template>
+          <span>Example: _, 5, 6, eating a 4 would be "eat left"</span>
+        </v-tooltip>
+      </div>
     </div>
     <v-btn v-if="this.transiting || this.player_turn === this.player_number"  @click="dialog = true">Hu</v-btn>
 
@@ -48,7 +71,7 @@ import { TileNameMap, UniqueTile } from "../models/tile";
 
 export default Vue.extend({
   name: "Player",
-  props: ["info", "player_turn", "player_number", "transiting"],
+  props: ["info", "player_turn", "player_number", "transiting", "turnNumber"],
   components: {
     Hand,
     Displayed
@@ -61,10 +84,11 @@ export default Vue.extend({
     };
   },
   updated() {
-    if (this.transiting && this.player_turn === this.player_number && this.lastPlayerTurn != this.player_turn) {
+    // 3rd boolean condition ensures only 1 block per game turn
+    if (this.transiting && this.player_turn === this.player_number && this.lastPlayerTurn !== this.turnNumber) {
+      console.log(`trigger block on draw for turn ${this.turnNumber}`)
+      this.lastPlayerTurn = this.turnNumber; // trigger only on first instance of update each turn
       this.drawDisabled = true;
-      this.lastPlayerTurn = this.player_turn; // trigger only on first instance of update each turn
-
       // set draw button to clickable
       const fn = () => {
         this.drawDisabled = false;
