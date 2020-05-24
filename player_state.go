@@ -174,7 +174,7 @@ func (p *PlayerState) InnerGong(t int, tiles []int) []int {
 	}
 
 	triplet := []int{}
-	newHand := make([]int, 0, len(p.Hand)-4)
+	newHand := make([]int, 0)
 	for _, h := range p.Hand {
 		tile := TileList[h]
 		if s == tile.Suit && v == tile.Value {

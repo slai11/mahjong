@@ -27,6 +27,7 @@
       <ul>
          <li>(Added 2020-05-24): 3 second disable on "Draw" button to allow other players to pong/gong/hu.</li>
          <li>(Added 2020-05-24): Added tooltip for "eat", "eat left" and "eat right" which pop-up an example for each case.</li>
+         <li>(Added 2020-05-24): Fix bug when player "an gong" with fewer than 4 tiles in hand.</li>
       </ul>
     </div>
     <br>
