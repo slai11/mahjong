@@ -5,7 +5,7 @@
 
 
     <div v-if="this.transiting">
-      <v-btn v-if="this.player_turn === this.player_number" @click="emitInterruptMove(1)" >Draw</v-btn>
+      <v-btn v-if="this.player_turn === this.player_number" @click="emitInterruptMove(1)" :disabled="drawDisabled">Draw</v-btn>
       <v-btn v-if="this.info.can_pong" @click="emitInterruptMove(5)" >Pong</v-btn>
       <v-btn v-if="this.info.can_gong" @click="emitInterruptMove(6)" >Gong</v-btn>
 
@@ -55,8 +55,25 @@ export default Vue.extend({
   },
   data() {
     return {
-      dialog: false
+      dialog: false,
+      drawDisabled: false,
+      lastPlayerTurn: -1,
     };
+  },
+  updated() {
+    if (this.transiting && this.player_turn === this.player_number && this.lastPlayerTurn != this.player_turn) {
+      this.drawDisabled = true;
+      this.lastPlayerTurn = this.player_turn; // trigger only on first instance of update each turn
+
+      // set draw button to clickable
+      const fn = () => {
+        this.drawDisabled = false;
+      }
+
+      setTimeout(function() {
+        fn();
+      }, 3000);
+    }
   },
   computed: {
     lastDrawnTile(): number {
