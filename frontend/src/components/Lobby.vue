@@ -23,6 +23,7 @@
     </div>
     <br>
     <div>
+      <h1>Tableswim is no longer operational due to $$ constraints.</h1>
       <h2>New Changes</h2>
       <ul>
          <li>(Added 2020-05-24): 3 second disable on "Draw" button to allow other players to pong/gong/hu.</li>
